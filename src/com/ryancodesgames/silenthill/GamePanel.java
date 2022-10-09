@@ -3,7 +3,6 @@ package com.ryancodesgames.silenthill;
 
 import com.ryancodesgames.silenthill.gameobject.Cube;
 import com.ryancodesgames.silenthill.gameobject.Pyramid;
-import static com.ryancodesgames.silenthill.gfx.DrawUtils.drawTriangle;
 import static com.ryancodesgames.silenthill.gfx.DrawUtils.texturedTriangle;
 import com.ryancodesgames.silenthill.math.Matrix;
 import com.ryancodesgames.silenthill.math.Mesh;
@@ -428,10 +427,10 @@ public class GamePanel extends JPanel implements Runnable
                 img, visibility, false);
                
                 
-                g2.setColor(Color.white); 
-                drawTriangle(g2, tt.vec3d.x, tt.vec3d.y, tt.vec3d2.x,
-                tt.vec3d2.y, tt.vec3d3.x, tt.vec3d3.y
-               );
+//                g2.setColor(Color.black); 
+//                drawTriangle(g2, tt.vec3d.x, tt.vec3d.y, tt.vec3d2.x,
+//                tt.vec3d2.y, tt.vec3d3.x, tt.vec3d3.y
+//               );
 //                
 //                //TURN 3D VECTOR X AND Y COORDINATES INTO A POLYGON THAT WILL FILL EACH SURFACE
 //                Polygon triangle = new Polygon();
