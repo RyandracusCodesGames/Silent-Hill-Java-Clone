@@ -3,6 +3,7 @@ package com.ryancodesgames.silenthill;
 
 import com.ryancodesgames.silenthill.gameobject.Cube;
 import com.ryancodesgames.silenthill.gameobject.Pyramid;
+import static com.ryancodesgames.silenthill.gfx.DrawUtils.draw;
 import static com.ryancodesgames.silenthill.gfx.DrawUtils.texturedTriangle;
 import com.ryancodesgames.silenthill.math.Matrix;
 import com.ryancodesgames.silenthill.math.Mesh;
@@ -12,7 +13,13 @@ import com.ryancodesgames.silenthill.math.Vec3D;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsEnvironment;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.MemoryImageSource;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,7 +35,7 @@ public class GamePanel extends JPanel implements Runnable
     //CLASS THAT HANDLES KEYBOARD INPUT
     KeyHandler keyH = new KeyHandler();
     //FRAMES PER SECOND
-    double fps = 240;
+    double fps = 100;
     //PROJECTION MATRIX DATA
     double fNear = 0.1; //NEAREAST CLIP PLANE
     double fFar = 1000.00; //FURTHERST CLIP PLANE
@@ -59,9 +66,15 @@ public class GamePanel extends JPanel implements Runnable
     
     BufferedImage img;
     
-    double[] pDepthBuffer;
-    
     Pyramid pyramid = new Pyramid(-5, 10, 0, 10, 10, 10);
+    
+    public int[] pixels;
+    
+    private ColorModel cm;
+    
+    private MemoryImageSource mImageProducer;
+    
+    private Image imageBuffer;
     
     public GamePanel()
     {
@@ -70,6 +83,7 @@ public class GamePanel extends JPanel implements Runnable
         this.setDoubleBuffered(true);
         initializeMesh();
         getRGB();
+        init();
     }
     
     public void startGameThread()
@@ -111,6 +125,13 @@ public class GamePanel extends JPanel implements Runnable
                 timer = 0;
             }
         }
+    }
+    
+     protected static ColorModel getCompatibleColorModel(){        
+        GraphicsConfiguration gfx_config = GraphicsEnvironment.
+                getLocalGraphicsEnvironment().getDefaultScreenDevice().
+                getDefaultConfiguration();        
+        return gfx_config.getColorModel();
     }
     
     public void initializeMesh()
@@ -161,8 +182,28 @@ public class GamePanel extends JPanel implements Runnable
                  
     }
     
-     public void getRGB()
+    public void init()
     {
+        cm = getCompatibleColorModel();
+        
+        int width = 800;
+        int height = 600;
+        
+        int screenSize = width * height;
+        
+        if(pixels == null || pixels.length < screenSize)
+        {
+             pixels = new int[screenSize];
+        }
+        
+        mImageProducer =  new MemoryImageSource(width, height, cm, pixels,0, width);
+        mImageProducer.setAnimated(true);
+        mImageProducer.setFullBufferUpdates(true);  
+        imageBuffer = Toolkit.getDefaultToolkit().createImage(mImageProducer); 
+    }
+    
+     public void getRGB()
+     {
         try
         {
             img = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/t_1.png"));
@@ -218,12 +259,25 @@ public class GamePanel extends JPanel implements Runnable
         {
             fYaw += 0.008;
         }
-        
+
     }
     
     public void paintComponent(Graphics g)
     {
         super.paintComponent(g);
+        
+        int[] pi = pixels; // this avoid crash when resizing
+        //a=h/w
+        final int h= 600;
+        if(pi.length != 800 * 600) return;        
+        for (int x=0;x<800;x++) {
+            for (int y=0;y<600;y++) {
+                boolean found=false;
+                if (!found) {
+                    pi[x + y * 800] = 0;
+                }
+            }
+        }   
         
         //FILL SCREEEN BLACK
         Color backgroundColor = Color.black;
@@ -232,7 +286,7 @@ public class GamePanel extends JPanel implements Runnable
         
         Graphics2D g2 = (Graphics2D)g;
         
-        fTheta += 0.02;
+        //fTheta += 0.02;
         
         //ROTATION MATRICES
         matZ = mat.rotationMatrixZ(fTheta * 0.5);
@@ -334,6 +388,7 @@ public class GamePanel extends JPanel implements Runnable
                     triProjected.vec2d = clipped[i].vec2d;
                     triProjected.vec2d2 = clipped[i].vec2d2;
                     triProjected.vec2d3 = clipped[i].vec2d3;
+                                 
           
                     //SCALE INTO VIEW
                     triProjected.vec3d.x += 1.0;
@@ -420,18 +475,19 @@ public class GamePanel extends JPanel implements Runnable
                 double visibility = Math.exp(-Math.pow(distance*density,gradient));
                 visibility = Math.min(Math.max(visibility, 0.0), 1.0);
                 
-               // tt.col = blend(backgroundColor, tt.col, (float)visibility);
+                //tt.col = blend(backgroundColor, tt.col, (float)visibility);
+               
              
                texturedTriangle(g2, (int)tt.vec3d.x,(int)tt.vec3d.y, tt.vec2d.u, tt.vec2d.v,(int)tt.vec3d2.x,(int)tt.vec3d2.y,
                 tt.vec2d2.u, tt.vec2d2.v,(int)tt.vec3d3.x,(int)tt.vec3d3.y, tt.vec2d3.u, tt.vec2d3.v,
-                img, visibility, false);
-               
-                
-//                g2.setColor(Color.black); 
+                img, visibility, false, pixels);
+    
+        
+//                g2.setColor(Color.white); 
 //                drawTriangle(g2, tt.vec3d.x, tt.vec3d.y, tt.vec3d2.x,
 //                tt.vec3d2.y, tt.vec3d3.x, tt.vec3d3.y
 //               );
-//                
+////                
 //                //TURN 3D VECTOR X AND Y COORDINATES INTO A POLYGON THAT WILL FILL EACH SURFACE
 //                Polygon triangle = new Polygon();
 //                triangle.addPoint((int)tt.vec3d.x,(int)tt.vec3d.y);
@@ -441,41 +497,25 @@ public class GamePanel extends JPanel implements Runnable
 //
 //                g.setColor(tt.col);
 //                g.fillPolygon(triangle);
-//  
-
+   
             }
+      
         }
         }
         
-        
+            // ask ImageProducer to update image
+            mImageProducer.newPixels();            
+        // draw it on panel          
+            g2.drawImage(this.imageBuffer, 0, 0, this);  
+//  
+            
         g.dispose();
     
     }
     
-public Color blend( Color c1, Color c2, float ratio ) 
-{
-    if ( ratio > 1f ) ratio = 1f;
-    else if ( ratio < 0f ) ratio = 0f;
-    float iRatio = 1.0f - ratio;
-
-    int i1 = c1.getRGB();
-    int i2 = c2.getRGB();
-
-    int a1 = (i1 >> 24 & 0xff);
-    int r1 = ((i1 & 0xff0000) >> 16);
-    int g1 = ((i1 & 0xff00) >> 8);
-    int b1 = (i1 & 0xff);
-
-    int a2 = (i2 >> 24 & 0xff);
-    int r2 = ((i2 & 0xff0000) >> 16);
-    int g2 = ((i2 & 0xff00) >> 8);
-    int b2 = (i2 & 0xff);
-
-    int a = (int)((a1 * iRatio) + (a2 * ratio));
-    int r = (int)((r1 * iRatio) + (r2 * ratio));
-    int g = (int)((g1 * iRatio) + (g2 * ratio));
-    int b = (int)((b1 * iRatio) + (b2 * ratio));
-
-    return new Color( a << 24 | r << 16 | g << 8 | b );
-}
+    @Override
+    public boolean imageUpdate(Image image, int a, int b, int c, int d, int e) {
+        return true;
+    }
+  
 }

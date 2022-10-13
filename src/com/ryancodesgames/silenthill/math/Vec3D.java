@@ -71,13 +71,14 @@ public class Vec3D
         return out;
     }
     
-    public Vec3D vectorIntersectPlane(Vec3D plane_p, Vec3D plane_n, Vec3D lineStart, Vec3D lineEnd, double t)
+    public Vec3D vectorIntersectPlane(Vec3D plane_p, Vec3D plane_n, Vec3D lineStart, Vec3D lineEnd, ExtraData tt)
     {
         plane_n = normalize(plane_n);
 	double plane_d = -dotProduct(plane_n, plane_p);
 	double ad = dotProduct(lineStart, plane_n);
 	double bd = dotProduct(lineEnd, plane_n);
-	t = (-plane_d - ad) / (bd - ad);
+	double t = (-plane_d-ad)/(bd-ad);
+        tt.t = t;
 	Vec3D lineStartToEnd = subtractVector(lineEnd, lineStart);
 	Vec3D lineToIntersect = multiplyVector(lineStartToEnd, t);
 	return addVector(lineStart, lineToIntersect);
@@ -132,42 +133,42 @@ public class Vec3D
         {
             out[0].col = in.col;
             out[0].vec3d = inside_points[0];
-          //  out[0].vec2d = inside_tex[0];
+            out[0].vec2d = inside_tex[0];
             
-            double t = 0;
+            ExtraData t = new ExtraData(0);
 
             out[0].vec3d2 = vectorIntersectPlane(plane_p, plane_n, inside_points[0], outside_points[0], t);
-          //  out[0].vec2d2.u = t * (outside_tex[0].u - inside_tex[0].u) + inside_tex[0].u;
-          //  out[0].vec2d2.v = t * (outside_tex[0].v - inside_tex[0].v) + inside_tex[0].v;
+            out[0].vec2d2.u = t.t * (outside_tex[0].u - inside_tex[0].u) + inside_tex[0].u;
+            out[0].vec2d2.v = t.t * (outside_tex[0].v - inside_tex[0].v) + inside_tex[0].v;
             
             out[0].vec3d3 = vectorIntersectPlane(plane_p, plane_n, inside_points[0], outside_points[1], t);
-          //  out[0].vec2d3.u = t * (outside_tex[1].u - inside_tex[0].u) + inside_tex[0].u;
-          //  out[0].vec2d3.v = t * (outside_tex[1].v - inside_tex[0].v) + inside_tex[0].v;
+            out[0].vec2d3.u = t.t * (outside_tex[1].u - inside_tex[0].u) + inside_tex[0].u;
+            out[0].vec2d3.v = t.t * (outside_tex[1].v - inside_tex[0].v) + inside_tex[0].v;
             return 1;
         }
         
         if(nInsidePointCount == 2 && nOutsidePointCount == 1)
         {
-            double t = 0;
+            ExtraData t = new ExtraData(0);
             
             out[0].col = in.col;
             out[0].vec3d = inside_points[0];
             out[0].vec3d2 = inside_points[1];
-         //   out[0].vec2d = inside_tex[0];
-          //  out[0].vec2d2 = inside_tex[1];
+            out[0].vec2d = inside_tex[0];
+            out[0].vec2d2 = inside_tex[1];
             
             out[0].vec3d3 = vectorIntersectPlane(plane_p, plane_n, inside_points[0], outside_points[0], t);
-         //   out[0].vec2d3.u = t * (outside_tex[0].u - inside_tex[0].u) + inside_tex[0].u;
-          //  out[0].vec2d3.v = t * (outside_tex[0].v - inside_tex[0].v) + inside_tex[0].v;
+            out[0].vec2d3.u = t.t * (outside_tex[0].u - inside_tex[0].u) + inside_tex[0].u;
+            out[0].vec2d3.v = t.t * (outside_tex[0].v - inside_tex[0].v) + inside_tex[0].v;
             
             out[1].col = in.col;
             out[1].vec3d = inside_points[1];
-          //  out[1].vec2d = inside_tex[1];
+            out[1].vec2d = inside_tex[1];
             out[1].vec3d2 = out[0].vec3d3; 
-          //  out[1].vec2d2 = out[0].vec2d3;
+            out[1].vec2d2 = out[0].vec2d3;
             out[1].vec3d3 = vectorIntersectPlane(plane_p, plane_n, inside_points[1], outside_points[0], t);
-          //  out[1].vec2d3.u = t * (outside_tex[0].u - inside_tex[1].u) + inside_tex[0].u;
-          //  out[1].vec2d3.v = t * (outside_tex[0].v - inside_tex[1].v) + inside_tex[0].v;
+            out[1].vec2d3.u = t.t * (outside_tex[0].u - inside_tex[1].u) + inside_tex[1].u;
+            out[1].vec2d3.v = t.t * (outside_tex[0].v - inside_tex[1].v) + inside_tex[1].v;
             return 2;
         }
         
