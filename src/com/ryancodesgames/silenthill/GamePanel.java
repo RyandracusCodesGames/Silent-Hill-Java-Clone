@@ -141,7 +141,7 @@ public class GamePanel extends JPanel implements Runnable
         
         List<Triangle> tris = new ArrayList<>();
         
-        tris = m.ReadOBJFile("m.txt", true);
+        tris = m.ReadOBJFile("lead.txt", true);
 //        
        meshCube = new Mesh(tris);
 //        
@@ -206,7 +206,7 @@ public class GamePanel extends JPanel implements Runnable
      {
         try
         {
-            img = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/t_1.png"));
+            img = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/h.png"));
         }
         catch(IOException e)
         {
@@ -278,6 +278,7 @@ public class GamePanel extends JPanel implements Runnable
                 }
             }
         }   
+
         
         //FILL SCREEEN BLACK
         Color backgroundColor = Color.black;
@@ -327,180 +328,183 @@ public class GamePanel extends JPanel implements Runnable
         
         for(Mesh meshCube: mesh)
         {
-                for(Triangle tri: meshCube.triangles)
-        {
-            Triangle triProjected = new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0));
-            Triangle triTrans = new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0));
-            Triangle triViewed = new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0));
-            
-            triTrans.vec3d = mat.multiplyMatrixVector(tri.vec3d, matWorld);
-            triTrans.vec3d2 = mat.multiplyMatrixVector(tri.vec3d2, matWorld);
-            triTrans.vec3d3 = mat.multiplyMatrixVector(tri.vec3d3, matWorld);
-            triTrans.vec2d = tri.vec2d;
-            triTrans.vec2d2 = tri.vec2d2;
-            triTrans.vec2d3 = tri.vec2d3;
-            
-            //COLLECT SURFACE NORMALS AND SEE HOW MUCH THEY MAP OVER THE CAMERA
-            Vec3D normal = new Vec3D(0,0,0);
-            Vec3D line1 = new Vec3D(0,0,0);
-            Vec3D line2 = new Vec3D(0,0,0);
-            
-            line1 = line1.subtractVector(triTrans.vec3d2, triTrans.vec3d);
-            line2 = line1.subtractVector(triTrans.vec3d3, triTrans.vec3d);
-            
-            normal = line1.crossProduct(line1, line2);
-            normal = line1.normalize(normal);
-            
-            Vec3D vCameraRay = new Vec3D(0,0,0);
-            vCameraRay = line1.subtractVector(triTrans.vec3d, vCamera);
-            
-            //HOW MUCH IS EACH TRIANGLE'S SURFACE NORMAL PROJECTING ONTO THE CAMERA
-            if(line1.dotProduct(normal, vCameraRay) < 0.0)
+             for(Triangle tri: meshCube.triangles)
             {
-             //DIRECTIONAL LIGHTING THAT SPECIFIES A DIRECTION AS TO WHERE LIGHT SHOULD PROJECT FROM
-             Vec3D light_direction = new Vec3D(0, 0, -1);
-             light_direction = line1.normalize(light_direction);
-             
-             double dp = Math.max(0.1, line1.dotProduct(light_direction, normal));
-             
-             //CONVERT WORLD SPACE TO VIEW SPACE
-             triViewed.vec3d = matView.multiplyMatrixVector(triTrans.vec3d, matView);
-             triViewed.vec3d2 = matView.multiplyMatrixVector(triTrans.vec3d2, matView);
-             triViewed.vec3d3 = matView.multiplyMatrixVector(triTrans.vec3d3, matView);
-             triViewed.vec2d = triTrans.vec2d;
-             triViewed.vec2d2 = triTrans.vec2d2;
-             triViewed.vec2d3 = triTrans.vec2d3;
-             
-              int nClippedTriangles = 0;
-                Triangle[] clipped = new Triangle[]{new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec2D(0,0), new Vec2D(0,0), new Vec2D(0,0))
-                        ,new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec2D(0,0), new Vec2D(0,0), new Vec2D(0,0))};
+                Triangle triProjected = new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0));
+                Triangle triTrans = new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0));
+                Triangle triViewed = new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0));
 
-                
-                nClippedTriangles = line1.triangleClipAgainstPlane(new Vec3D(0,0,0.1), new Vec3D(0,0,1
-                ),triViewed, clipped);
-                
-              for(int i = 0; i < nClippedTriangles; i++)
-              {
-                  //PROJECT 3D GEOMETRICAL DATA TO NORMALIZED 2D SCREEN
-                    triProjected.vec3d = mat.multiplyMatrixVector(clipped[i].vec3d, matProj);
-                    triProjected.vec3d2 = mat.multiplyMatrixVector(clipped[i].vec3d2, matProj);
-                    triProjected.vec3d3 = mat.multiplyMatrixVector(clipped[i].vec3d3, matProj);
-                    triProjected.vec2d = clipped[i].vec2d;
-                    triProjected.vec2d2 = clipped[i].vec2d2;
-                    triProjected.vec2d3 = clipped[i].vec2d3;
-                                 
-          
-                    //SCALE INTO VIEW
-                    triProjected.vec3d.x += 1.0;
-                    triProjected.vec3d2.x += 1.0;
-                    triProjected.vec3d3.x += 1.0;
-                    triProjected.vec3d.y += 1.0;
-                    triProjected.vec3d2.y += 1.0;
-                    triProjected.vec3d3.y += 1.0;
-            
-                    triProjected.vec3d.x *= 0.5 * 800;
-                    triProjected.vec3d.y *= 0.5 * 600;
-                    triProjected.vec3d2.x *= 0.5 * 800;
-                    triProjected.vec3d2.y *= 0.5 * 600;
-                    triProjected.vec3d3.x *= 0.5 * 800;
-                    triProjected.vec3d3.y *= 0.5 * 600;
-             
-                    triProjected.color((int)Math.abs(dp*255),(int)Math.abs(dp*255),(int)Math.abs(dp*255));
-                    
-                    vecTrianglesToRaster.add(triProjected);
-              }
-             
-            }
-        }    
-        
-        Collections.sort((ArrayList<Triangle>)vecTrianglesToRaster, new Comparator<Triangle>() {
-                @Override
-                public int compare(Triangle t1, Triangle t2) {
-                    double z1=(t1.vec3d.z+t1.vec3d2.z+t1.vec3d3.z)/3.0;
-                    double z2=(t2.vec3d.z+t2.vec3d2.z+t2.vec3d3.z)/3.0;
-                    return (z1<z2)?1:(z1==z2)?0:-1;
-                }
-            });
-  
-       for(Triangle t: vecTrianglesToRaster)
-        {
-            Triangle[] clipped = new Triangle[]{new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec2D(0,0), new Vec2D(0,0), new Vec2D(0,0)),
-                new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec2D(0,0), new Vec2D(0,0), new Vec2D(0,0))};;
-            
-            LinkedList<Triangle> listTriangles = new LinkedList<>();
-            listTriangles.add(t);
-            int nNewTriangles = 1;
-            
-            for(int p = 0; p < 4; p++)
-            {
-                int trisToAdd = 0;
-                
-                while(nNewTriangles > 0)
+                triTrans.vec3d = mat.multiplyMatrixVector(tri.vec3d, matWorld);
+                triTrans.vec3d2 = mat.multiplyMatrixVector(tri.vec3d2, matWorld);
+                triTrans.vec3d3 = mat.multiplyMatrixVector(tri.vec3d3, matWorld);
+                triTrans.vec2d = tri.vec2d;
+                triTrans.vec2d2 = tri.vec2d2;
+                triTrans.vec2d3 = tri.vec2d3;
+
+                //COLLECT SURFACE NORMALS AND SEE HOW MUCH THEY MAP OVER THE CAMERA
+                Vec3D normal = new Vec3D(0,0,0);
+                Vec3D line1 = new Vec3D(0,0,0);
+                Vec3D line2 = new Vec3D(0,0,0);
+
+                line1 = line1.subtractVector(triTrans.vec3d2, triTrans.vec3d);
+                line2 = line1.subtractVector(triTrans.vec3d3, triTrans.vec3d);
+
+                normal = line1.crossProduct(line1, line2);
+                normal = line1.normalize(normal);
+
+                Vec3D vCameraRay = new Vec3D(0,0,0);
+                vCameraRay = line1.subtractVector(triTrans.vec3d, vCamera);
+
+                //HOW MUCH IS EACH TRIANGLE'S SURFACE NORMAL PROJECTING ONTO THE CAMERA
+                if(line1.dotProduct(normal, vCameraRay) < 0.0)
                 {
-                    Triangle test = new Triangle(new Vec3D(0,0,0),new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec2D(0,0), new Vec2D(0,0), new Vec2D(0,0));
-                    test = listTriangles.peek();
-                    listTriangles.pollFirst();
-                    nNewTriangles--;
-                    
-                    Vec3D vec = new Vec3D(0,0,0);  
-                    
-                    switch(p)
-                    {
-                        case 0:{trisToAdd = vec.triangleClipAgainstPlane(new Vec3D(0,0,0),new Vec3D(0,1,0),test,clipped);}break;
-                        case 1:{trisToAdd = vec.triangleClipAgainstPlane(new Vec3D(0,600-1,0),new Vec3D(0,-1,0),test,clipped);}break;
-                        case 2:{trisToAdd = vec.triangleClipAgainstPlane(new Vec3D(0,0,0),new Vec3D(1,0,0),test,clipped);}break;
-                        case 3:{trisToAdd = vec.triangleClipAgainstPlane(new Vec3D(800-1,0,0),new Vec3D(-1,0,0),test,clipped);}break;
-                    }
-                      
-                    for (int w = 0; w < trisToAdd; w++)
-                    {
-                        listTriangles.add(clipped[w]);
-                    }
+                 //DIRECTIONAL LIGHTING THAT SPECIFIES A DIRECTION AS TO WHERE LIGHT SHOULD PROJECT FROM
+                 Vec3D light_direction = new Vec3D(0, 0, -1);
+                 light_direction = line1.normalize(light_direction);
+
+                 double dp = Math.max(0.1, line1.dotProduct(light_direction, normal));
+
+                 //CONVERT WORLD SPACE TO VIEW SPACE
+                 triViewed.vec3d = matView.multiplyMatrixVector(triTrans.vec3d, matView);
+                 triViewed.vec3d2 = matView.multiplyMatrixVector(triTrans.vec3d2, matView);
+                 triViewed.vec3d3 = matView.multiplyMatrixVector(triTrans.vec3d3, matView);
+                 triViewed.vec2d = triTrans.vec2d;
+                 triViewed.vec2d2 = triTrans.vec2d2;
+                 triViewed.vec2d3 = triTrans.vec2d3;
+
+                  int nClippedTriangles = 0;
+                    Triangle[] clipped = new Triangle[]{new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec2D(0,0), new Vec2D(0,0), new Vec2D(0,0))
+                            ,new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec2D(0,0), new Vec2D(0,0), new Vec2D(0,0))};
+
+
+                    nClippedTriangles = line1.triangleClipAgainstPlane(new Vec3D(0,0,0.1), new Vec3D(0,0,1
+                    ),triViewed, clipped);
+
+                  for(int i = 0; i < nClippedTriangles; i++)
+                  {
+                      //PROJECT 3D GEOMETRICAL DATA TO NORMALIZED 2D SCREEN
+                        triProjected.vec3d = mat.multiplyMatrixVector(clipped[i].vec3d, matProj);
+                        triProjected.vec3d2 = mat.multiplyMatrixVector(clipped[i].vec3d2, matProj);
+                        triProjected.vec3d3 = mat.multiplyMatrixVector(clipped[i].vec3d3, matProj);
+                        triProjected.vec2d = clipped[i].vec2d;
+                        triProjected.vec2d2 = clipped[i].vec2d2;
+                        triProjected.vec2d3 = clipped[i].vec2d3;
+
+
+                        //SCALE INTO VIEW
+                        triProjected.vec3d.x += 1.0;
+                        triProjected.vec3d2.x += 1.0;
+                        triProjected.vec3d3.x += 1.0;
+                        triProjected.vec3d.y += 1.0;
+                        triProjected.vec3d2.y += 1.0;
+                        triProjected.vec3d3.y += 1.0;
+
+                        triProjected.vec3d.x *= 0.5 * 800;
+                        triProjected.vec3d.y *= 0.5 * 600;
+                        triProjected.vec3d2.x *= 0.5 * 800;
+                        triProjected.vec3d2.y *= 0.5 * 600;
+                        triProjected.vec3d3.x *= 0.5 * 800;
+                        triProjected.vec3d3.y *= 0.5 * 600;
+
+                        triProjected.color((int)Math.abs(dp*255),(int)Math.abs(dp*255),(int)Math.abs(dp*255));
+
+                        vecTrianglesToRaster.add(triProjected);
+                  }
+
                 }
-                 nNewTriangles = listTriangles.size();
-            }
-     
-            for(Triangle tt: listTriangles)
+            }    
+
+            Collections.sort((ArrayList<Triangle>)vecTrianglesToRaster, new Comparator<Triangle>() {
+                    @Override
+                    public int compare(Triangle t1, Triangle t2) {
+                        double z1=(t1.vec3d.z+t1.vec3d2.z+t1.vec3d3.z)/3.0;
+                        double z2=(t2.vec3d.z+t2.vec3d2.z+t2.vec3d3.z)/3.0;
+                        return (z1<z2)?1:(z1==z2)?0:-1;
+                    }
+                });
+
+           for(Triangle t: vecTrianglesToRaster)
             {
-                Vec3D v = new Vec3D(0,0,0);
-                
-                double density = 0.0035;
-                double gradient = 2.0;
-                    
-                Vec3D distFromCamera = new Vec3D(0,0,0);
-                distFromCamera = v.subtractVector(tt.vec3d, vCamera);
-                    
-                double distance = v.vectorLength(distFromCamera);
-                    
-                double visibility = Math.exp(-Math.pow(distance*density,gradient));
-                visibility = Math.min(Math.max(visibility, 0.0), 1.0);
-                
-                //tt.col = blend(backgroundColor, tt.col, (float)visibility);
-               
-             
-               texturedTriangle(g2, (int)tt.vec3d.x,(int)tt.vec3d.y, tt.vec2d.u, tt.vec2d.v,(int)tt.vec3d2.x,(int)tt.vec3d2.y,
-                tt.vec2d2.u, tt.vec2d2.v,(int)tt.vec3d3.x,(int)tt.vec3d3.y, tt.vec2d3.u, tt.vec2d3.v,
-                img, visibility, false, pixels);
-    
-        
-//                g2.setColor(Color.white); 
-//                drawTriangle(g2, tt.vec3d.x, tt.vec3d.y, tt.vec3d2.x,
-//                tt.vec3d2.y, tt.vec3d3.x, tt.vec3d3.y
-//               );
-////                
-//                //TURN 3D VECTOR X AND Y COORDINATES INTO A POLYGON THAT WILL FILL EACH SURFACE
-//                Polygon triangle = new Polygon();
-//                triangle.addPoint((int)tt.vec3d.x,(int)tt.vec3d.y);
-//                triangle.addPoint((int)tt.vec3d2.x,(int)tt.vec3d2.y);
-//                triangle.addPoint((int)tt.vec3d3.x,(int)tt.vec3d3.y);
-//                
-//
-//                g.setColor(tt.col);
-//                g.fillPolygon(triangle);
-   
+                Triangle[] clipped = new Triangle[]{new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec2D(0,0), new Vec2D(0,0), new Vec2D(0,0)),
+                    new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec2D(0,0), new Vec2D(0,0), new Vec2D(0,0))};
+
+                LinkedList<Triangle> listTriangles = new LinkedList<>();
+                listTriangles.add(t);
+                int nNewTriangles = 1;
+
+                for(int p = 0; p < 4; p++)
+                {
+                    int trisToAdd = 0;
+
+                    while(nNewTriangles > 0)
+                    {
+                        clipped = new Triangle[]{new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec2D(0,0), new Vec2D(0,0), new Vec2D(0,0)),
+                    new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec2D(0,0), new Vec2D(0,0), new Vec2D(0,0))};
+                        
+                        Triangle test = new Triangle(new Vec3D(0,0,0),new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec2D(0,0), new Vec2D(0,0), new Vec2D(0,0));
+                        test = listTriangles.peek();
+                        listTriangles.pollFirst();
+                        nNewTriangles--;
+
+                        Vec3D vec = new Vec3D(0,0,0);  
+
+                        switch(p)
+                        {
+                            case 0:{trisToAdd = vec.triangleClipAgainstPlane(new Vec3D(0,0,0),new Vec3D(0,1,0),test,clipped);}break;
+                            case 1:{trisToAdd = vec.triangleClipAgainstPlane(new Vec3D(0,600-1,0),new Vec3D(0,-1,0),test,clipped);}break;
+                            case 2:{trisToAdd = vec.triangleClipAgainstPlane(new Vec3D(0,0,0),new Vec3D(1,0,0),test,clipped);}break;
+                            case 3:{trisToAdd = vec.triangleClipAgainstPlane(new Vec3D(800-1,0,0),new Vec3D(-1,0,0),test,clipped);}break;
+                        }
+
+                        for (int w = 0; w < trisToAdd; w++)
+                        {
+                            listTriangles.add(clipped[w]);
+                        }
+                    }
+                     nNewTriangles = listTriangles.size();
+                }
+
+                for(Triangle tt: listTriangles)
+                {
+                    Vec3D v = new Vec3D(0,0,0);
+
+                    double density = 0.0035;
+                    double gradient = 2.0;
+
+                    Vec3D distFromCamera = new Vec3D(0,0,0);
+                    distFromCamera = v.subtractVector(tt.vec3d, vCamera);
+
+                    double distance = v.vectorLength(distFromCamera);
+
+                    double visibility = Math.exp(-Math.pow(distance*density,gradient));
+                    visibility = Math.min(Math.max(visibility, 0.0), 1.0);
+
+                    //tt.col = blend(backgroundColor, tt.col, (float)visibility);
+
+
+                   texturedTriangle(g2, (int)tt.vec3d.x,(int)tt.vec3d.y, tt.vec2d.u, tt.vec2d.v,(int)tt.vec3d2.x,(int)tt.vec3d2.y,
+                    tt.vec2d2.u, tt.vec2d2.v,(int)tt.vec3d3.x,(int)tt.vec3d3.y, tt.vec2d3.u, tt.vec2d3.v,
+                    img, visibility, false, pixels);
+
+
+    //                g2.setColor(Color.white); 
+    //                drawTriangle(g2, tt.vec3d.x, tt.vec3d.y, tt.vec3d2.x,
+    //                tt.vec3d2.y, tt.vec3d3.x, tt.vec3d3.y
+    //               );
+    ////                
+    //                //TURN 3D VECTOR X AND Y COORDINATES INTO A POLYGON THAT WILL FILL EACH SURFACE
+    //                Polygon triangle = new Polygon();
+    //                triangle.addPoint((int)tt.vec3d.x,(int)tt.vec3d.y);
+    //                triangle.addPoint((int)tt.vec3d2.x,(int)tt.vec3d2.y);
+    //                triangle.addPoint((int)tt.vec3d3.x,(int)tt.vec3d3.y);
+    //                
+    //
+    //                g.setColor(tt.col);
+    //                g.fillPolygon(triangle);
+
+                }
+
             }
-      
-        }
         }
         
             // ask ImageProducer to update image
