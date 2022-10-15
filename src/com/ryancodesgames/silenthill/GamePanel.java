@@ -3,14 +3,15 @@ package com.ryancodesgames.silenthill;
 
 import com.ryancodesgames.silenthill.gameobject.Cube;
 import com.ryancodesgames.silenthill.gameobject.Pyramid;
-import static com.ryancodesgames.silenthill.gfx.DrawUtils.draw;
 import static com.ryancodesgames.silenthill.gfx.DrawUtils.texturedTriangle;
 import com.ryancodesgames.silenthill.math.Matrix;
 import com.ryancodesgames.silenthill.math.Mesh;
 import com.ryancodesgames.silenthill.math.Triangle;
 import com.ryancodesgames.silenthill.math.Vec2D;
 import com.ryancodesgames.silenthill.math.Vec3D;
+import com.ryancodesgames.silenthill.sound.Sound;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
@@ -55,10 +56,11 @@ public class GamePanel extends JPanel implements Runnable
     Mesh meshCube4;
     Mesh meshCube5;
     Mesh meshDoor;
+    Mesh meshShip;
     
     Mesh m =  new Mesh();
     //STATIONARY POSTION VECTOR THAT WILL SERVE AS THE CAMERA
-    Vec3D vCamera = new Vec3D(0,0,0);
+    Vec3D vCamera = new Vec3D(0,0,-600);
     //CAMERA THAT FOLLOWS ALONG THE LOOK AT DIRECTION
     Vec3D vLookDir = new Vec3D(0,0,1);
     //ROTATION AROUND Y-AXIS FOR CAMERA
@@ -66,7 +68,15 @@ public class GamePanel extends JPanel implements Runnable
     
     BufferedImage img;
     
+    BufferedImage img2;
+    
     Pyramid pyramid = new Pyramid(-5, 10, 0, 10, 10, 10);
+    
+    Sound sound = new Sound();
+    
+    boolean musicPlaying = true;
+    
+    int triangleCount = 0;
     
     public int[] pixels;
     
@@ -82,7 +92,6 @@ public class GamePanel extends JPanel implements Runnable
         this.setFocusable(true);
         this.setDoubleBuffered(true);
         initializeMesh();
-        getRGB();
         init();
     }
     
@@ -136,14 +145,17 @@ public class GamePanel extends JPanel implements Runnable
     
     public void initializeMesh()
     {
-        //LOCAL CACHE OF VERTICES
-        List<Vec3D> verts = new ArrayList<>();
+        getRGB();
         
+        //LOCAL CACHE OF VERTICES  
         List<Triangle> tris = new ArrayList<>();
+        List<Triangle> tris2 = new ArrayList<>();
         
-        tris = m.ReadOBJFile("lead.txt", true);
-//        
-       meshCube = new Mesh(tris);
+        tris = m.ReadOBJFile("yes.txt", true);
+        tris2 = m.ReadOBJFile("m.txt", true);
+
+       meshCube = new Mesh(tris, img);
+       meshShip = new Mesh(tris2, img2);
 //        
             Cube cube = new Cube(-5, 0, 0, 0.2, 10, 10);
             Cube cube2 = new Cube(4.8, 0, 0, 0.2, 10, 10);
@@ -206,7 +218,8 @@ public class GamePanel extends JPanel implements Runnable
      {
         try
         {
-            img = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/h.png"));
+            img = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/t_1.png"));
+            img2 = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/fight.png"));
         }
         catch(IOException e)
         {
@@ -216,7 +229,7 @@ public class GamePanel extends JPanel implements Runnable
     }
     
     public void update()
-    {
+    {  
         if(keyH.leftPressed)
         {
             vCamera.x -= 0.25;
@@ -230,11 +243,19 @@ public class GamePanel extends JPanel implements Runnable
         if(keyH.upPressed)
         {
             vCamera.y -= 0.25;
+            
+            if(!musicPlaying)
+            {
+                play();
+                musicPlaying = true;
+            }
         }
         
         if(keyH.downPressed)
         {
             vCamera.y += 0.25;
+            stop();
+            musicPlaying = false;
         }
         
         Vec3D vFoward = new Vec3D(0,0,0);
@@ -274,11 +295,12 @@ public class GamePanel extends JPanel implements Runnable
             for (int y=0;y<600;y++) {
                 boolean found=false;
                 if (!found) {
-                    pi[x + y * 800] = 0;
+                    pi[x + y * 800] = Color.gray.getRGB();
                 }
             }
         }   
 
+        triangleCount = 0;
         
         //FILL SCREEEN BLACK
         Color backgroundColor = Color.black;
@@ -318,6 +340,7 @@ public class GamePanel extends JPanel implements Runnable
         
         List<Mesh> mesh = new ArrayList<>();
         mesh.add(meshCube);
+        mesh.add(meshShip);
        // mesh.add(meshCube2);
       //  mesh.add(meshCube3);
       //  mesh.add(meshCube4);
@@ -325,6 +348,26 @@ public class GamePanel extends JPanel implements Runnable
       //  mesh.add(meshDoor);
         
         List<Triangle> vecTrianglesToRaster = new ArrayList<>();
+        
+        for(Triangle t: meshCube.triangles)
+        {
+            if(musicPlaying)
+            {
+                t.vec3d.z -= 0.5;
+                t.vec3d2.z -= 0.5;
+                t.vec3d3.z -= 0.5;
+            }  
+        }
+        
+        for(Triangle t: meshShip.triangles)
+        {
+            if(musicPlaying)
+            {
+                t.vec3d.z -= 0.25;
+                t.vec3d2.z -= 0.25;
+                t.vec3d3.z -= 0.25;
+            }
+        }
         
         for(Mesh meshCube: mesh)
         {
@@ -484,24 +527,25 @@ public class GamePanel extends JPanel implements Runnable
 
                    texturedTriangle(g2, (int)tt.vec3d.x,(int)tt.vec3d.y, tt.vec2d.u, tt.vec2d.v,(int)tt.vec3d2.x,(int)tt.vec3d2.y,
                     tt.vec2d2.u, tt.vec2d2.v,(int)tt.vec3d3.x,(int)tt.vec3d3.y, tt.vec2d3.u, tt.vec2d3.v,
-                    img, visibility, false, pixels);
+                    meshCube.img, visibility, true, pixels);
 
+//                    g2.setColor(Color.black); 
+//                    drawTriangle(g2, tt.vec3d.x, tt.vec3d.y, tt.vec3d2.x,
+//                    tt.vec3d2.y, tt.vec3d3.x, tt.vec3d3.y
+//                   );
+//    //                
+//                    //TURN 3D VECTOR X AND Y COORDINATES INTO A POLYGON THAT WILL FILL EACH SURFACE
+//                    Polygon triangle = new Polygon();
+//                    triangle.addPoint((int)tt.vec3d.x,(int)tt.vec3d.y);
+//                    triangle.addPoint((int)tt.vec3d2.x,(int)tt.vec3d2.y);
+//                    triangle.addPoint((int)tt.vec3d3.x,(int)tt.vec3d3.y);
+//                    
+//    
+//                    g.setColor(tt.col);
+//                    g.fillPolygon(triangle);
 
-    //                g2.setColor(Color.white); 
-    //                drawTriangle(g2, tt.vec3d.x, tt.vec3d.y, tt.vec3d2.x,
-    //                tt.vec3d2.y, tt.vec3d3.x, tt.vec3d3.y
-    //               );
-    ////                
-    //                //TURN 3D VECTOR X AND Y COORDINATES INTO A POLYGON THAT WILL FILL EACH SURFACE
-    //                Polygon triangle = new Polygon();
-    //                triangle.addPoint((int)tt.vec3d.x,(int)tt.vec3d.y);
-    //                triangle.addPoint((int)tt.vec3d2.x,(int)tt.vec3d2.y);
-    //                triangle.addPoint((int)tt.vec3d3.x,(int)tt.vec3d3.y);
-    //                
-    //
-    //                g.setColor(tt.col);
-    //                g.fillPolygon(triangle);
-
+                      triangleCount++;
+                     
                 }
 
             }
@@ -510,9 +554,19 @@ public class GamePanel extends JPanel implements Runnable
             // ask ImageProducer to update image
             mImageProducer.newPixels();            
         // draw it on panel          
-            g2.drawImage(this.imageBuffer, 0, 0, this);  
-//  
+            g2.drawImage(this.imageBuffer, 0, 0, this);
             
+            g2.setColor(Color.green);
+            g2.setFont(new Font("Arial", Font.BOLD, 20));
+            g2.drawString("Coordinates:", 10, 50);
+            g2.drawString("X:"+" "+String.valueOf(vCamera.x), 10, 70);
+            g2.drawString("Y:"+" "+String.valueOf(vCamera.y), 10, 90);
+            g2.drawString("Z:"+" "+String.valueOf(vCamera.z), 10, 110);
+            g2.drawString("Triangles:"+" "+String.valueOf(triangleCount), 10, 150);
+            g2.drawString("Textured = TRUE", 10, 180);
+            g2.drawString("Yaw:"+" "+String.valueOf(fYaw), 10, 210);
+            g2.drawString("Music ON:"+" "+String.valueOf(musicPlaying),10, 240);
+   
         g.dispose();
     
     }
@@ -520,6 +574,24 @@ public class GamePanel extends JPanel implements Runnable
     @Override
     public boolean imageUpdate(Image image, int a, int b, int c, int d, int e) {
         return true;
+    }
+    
+    public void playMusic(int i)
+    {
+        sound.setFile(i);
+        sound.play();
+        sound.loop();
+    }
+    
+    public void play()
+    {
+        sound.play();
+        sound.loop();
+    }
+    
+    public void stop()
+    {
+        sound.stop();
     }
   
 }

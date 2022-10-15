@@ -25,6 +25,8 @@ public class SilentHill {
         jframe.add(gp);
         jframe.setVisible(true);
         
+        gp.playMusic(0);
+        
         gp.startGameThread();
     }
     

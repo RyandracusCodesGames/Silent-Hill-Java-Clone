@@ -1,13 +1,13 @@
 
 package com.ryancodesgames.silenthill.math;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.regex.Pattern;
 
 
@@ -15,9 +15,17 @@ public class Mesh
 {
     public List<Triangle> triangles = new ArrayList<>();
     
+    public BufferedImage img;
+    
     public Mesh(List<Triangle> tris)
     {
         this.triangles = tris;
+    }
+    
+    public Mesh(List<Triangle> tris, BufferedImage img)
+    {
+        this.triangles = tris;
+        this.img = img;
     }
     
     public Mesh()
