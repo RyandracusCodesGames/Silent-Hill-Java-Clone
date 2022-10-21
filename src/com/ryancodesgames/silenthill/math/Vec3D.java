@@ -71,6 +71,18 @@ public class Vec3D
         return out;
     }
     
+    public double getAngle(Vec3D pos, Vec3D target)
+    {
+        double dot = dotProduct(pos, target);
+        dot = dot / (vectorLength(pos) * vectorLength(target));
+        
+        double arcCos = Math.acos(dot);
+        
+        double angle = arcCos * 180.00 / Math.PI;
+        
+        return angle;
+    }
+    
     public Vec3D vectorIntersectPlane(Vec3D plane_p, Vec3D plane_n, Vec3D lineStart, Vec3D lineEnd, ExtraData tt)
     {
         plane_n = normalize(plane_n);

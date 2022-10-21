@@ -26,7 +26,7 @@ public class Sound
             clip = AudioSystem.getClip();
             clip.open(ais);
             FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-            gainControl.setValue(-10.0f);
+            gainControl.setValue(-35.0f);
         }
         catch(Exception e)
         {

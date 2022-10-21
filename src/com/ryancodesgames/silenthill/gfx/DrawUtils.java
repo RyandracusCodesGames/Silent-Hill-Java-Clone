@@ -159,7 +159,7 @@ public class DrawUtils
                      tex_u = (1.0 - t) * tex_su + t * tex_eu;
                      tex_v = (1.0 - t) * tex_sv + t * tex_ev;
                      
-                     Color background = Color.gray;
+                     Color background = Color.black;
                      Color col = new Color(img.getRGB(
                           (int)Math.max(0,tex_u*(img.getWidth()-1)),
                           (int)Math.max(0,tex_v*(img.getHeight()-1))
@@ -238,7 +238,7 @@ public class DrawUtils
                      tex_u = (1.0 - t) * tex_su + t * tex_eu;
                      tex_v = (1.0 - t) * tex_sv + t * tex_ev;
                      
-                     Color background = Color.gray;
+                     Color background = Color.black;
                      Color col = new Color(img.getRGB(
                           (int)Math.max(0,tex_u*(img.getWidth()-1)),
                           (int)Math.max(0,tex_v*(img.getHeight()-1))

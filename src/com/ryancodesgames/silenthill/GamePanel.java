@@ -57,10 +57,9 @@ public class GamePanel extends JPanel implements Runnable
     Mesh meshCube5;
     Mesh meshDoor;
     Mesh meshShip;
-    
     Mesh m =  new Mesh();
     //STATIONARY POSTION VECTOR THAT WILL SERVE AS THE CAMERA
-    Vec3D vCamera = new Vec3D(0,0,-600);
+    Vec3D vCamera = new Vec3D(0,0,0);
     //CAMERA THAT FOLLOWS ALONG THE LOOK AT DIRECTION
     Vec3D vLookDir = new Vec3D(0,0,1);
     //ROTATION AROUND Y-AXIS FOR CAMERA
@@ -78,6 +77,8 @@ public class GamePanel extends JPanel implements Runnable
     
     int triangleCount = 0;
     
+    int i = 0;
+    
     public int[] pixels;
     
     private ColorModel cm;
@@ -86,6 +87,14 @@ public class GamePanel extends JPanel implements Runnable
     
     private Image imageBuffer;
     
+    double movementSpeed = 0.3;
+
+    Vec3D origin = new Vec3D(0,0,0);
+    
+    int timer = 0;
+    
+    boolean turn = true;
+
     public GamePanel()
     {
         this.addKeyListener(keyH);
@@ -153,44 +162,45 @@ public class GamePanel extends JPanel implements Runnable
         
         tris = m.ReadOBJFile("yes.txt", true);
         tris2 = m.ReadOBJFile("m.txt", true);
-
-       meshCube = new Mesh(tris, img);
-       meshShip = new Mesh(tris2, img2);
+        
+        meshCube = new Mesh(tris, img2);
+        meshShip = new Mesh(tris2, img);
+        
 //        
-            Cube cube = new Cube(-5, 0, 0, 0.2, 10, 10);
-            Cube cube2 = new Cube(4.8, 0, 0, 0.2, 10, 10);
-            Cube cube3 = new Cube(-5, 0, 0, 10, 10, 0.2);
-            Cube cube4 = new Cube(-5, 0, 10, 10, 10, 0.2);
-            Cube cube5 = new Cube(-1, 0, 11, 2, 5, 0.1);
+        Cube cube = new Cube(0, 0, 0, 10, 10, 1);
+        Cube cube2 = new Cube(4.8, 0, 0, 0.2, 10, 10);
+        Cube cube3 = new Cube(-5, 0, 0, 10, 10, 0.2);
+        Cube cube4 = new Cube(-5, 0, 10, 10, 10, 0.2);
+        Cube cube5 = new Cube(-1, 0, 11, 2, 5, 0.1);
             
-      //  meshCube = new Mesh(pyramid.meshPyramid.triangles);
+      //  meshCube = new Mesh(cube.meshCube.triangles, img2);
         meshCube2 = new Mesh(cube2.meshCube.triangles);
-        meshCube3 = new Mesh(cube.meshCube.triangles);
+        meshCube3 = new Mesh(cube.meshCube.triangles, img);
         meshCube4 = new Mesh(cube3.meshCube.triangles);
         meshCube5 = new Mesh(cube4.meshCube.triangles);
         meshDoor = new Mesh(cube5.meshCube.triangles);
-//
-		// meshCube = new Mesh(Arrays.asList(
-//                new Triangle[]{
-//                    //SOUTH
-//                    new Triangle(new Vec3D(0,0,0), new Vec3D(0,1,0), new Vec3D(1,1,0), new Vec2D(0,0), new Vec2D(0,1), new Vec2D(1,1)),
-//                    new Triangle(new Vec3D(0,0,0), new Vec3D(1,1,0), new Vec3D(1,0,0), new Vec2D(0,0), new Vec2D(1,1), new Vec2D(1,0)),
-//                    //EAST
-//                    new Triangle(new Vec3D(1,0,0), new Vec3D(1,1,0), new Vec3D(1,1,1), new Vec2D(0,0), new Vec2D(0,1), new Vec2D(1,1)),
-//                    new Triangle(new Vec3D(1,0,0), new Vec3D(1,1,1), new Vec3D(1,0,1), new Vec2D(0,0), new Vec2D(1,1), new Vec2D(1,0)),
-//                    //NORTH
-//                    new Triangle(new Vec3D(1,0,1), new Vec3D(1,1,1), new Vec3D(0,1,1), new Vec2D(0,0), new Vec2D(0,1), new Vec2D(1,1)),
-//                    new Triangle(new Vec3D(1,0,1), new Vec3D(0,1,1), new Vec3D(0,0,1), new Vec2D(0,0), new Vec2D(1,1), new Vec2D(1,0)),
-//                    //WEST
-//                    new Triangle(new Vec3D(0,0,1), new Vec3D(0,1,1), new Vec3D(0,1,0), new Vec2D(0,0), new Vec2D(0,1), new Vec2D(1,1)),
-//                    new Triangle(new Vec3D(0,0,1), new Vec3D(0,1,0), new Vec3D(0,0,0), new Vec2D(0,0), new Vec2D(1,1), new Vec2D(1,0)),
-//                    //TOP
-//                    new Triangle(new Vec3D(0,1,0), new Vec3D(0,1,1), new Vec3D(1,1,1), new Vec2D(0,0), new Vec2D(0,1), new Vec2D(1,1)),
-//                    new Triangle(new Vec3D(0,1,0), new Vec3D(1,1,1), new Vec3D(1,1,0), new Vec2D(0,0), new Vec2D(1,1), new Vec2D(1,0)),
-//                    //BOTTOM
-//                    new Triangle(new Vec3D(1,0,1), new Vec3D(0,0,1), new Vec3D(0,0,0), new Vec2D(0,0), new Vec2D(0,1), new Vec2D(1,1)),
-//                    new Triangle(new Vec3D(1,0,1), new Vec3D(0,0,0), new Vec3D(1,0,0), new Vec2D(0,0), new Vec2D(1,1), new Vec2D(1,0))
-//                }));
+
+//        meshCube = new Mesh(Arrays.asList(
+//       new Triangle[]{
+//           //SOUTH
+//           new Triangle(new Vec3D(0,0,0), new Vec3D(0,1,0), new Vec3D(1,1,0), new Vec2D(0,0), new Vec2D(0,1), new Vec2D(1,1)),
+//           new Triangle(new Vec3D(0,0,0), new Vec3D(1,1,0), new Vec3D(1,0,0), new Vec2D(0,0), new Vec2D(1,1), new Vec2D(1,0)),
+//           //EAST
+//           new Triangle(new Vec3D(1,0,0), new Vec3D(1,1,0), new Vec3D(1,1,1), new Vec2D(0,0), new Vec2D(0,1), new Vec2D(1,1)),
+//           new Triangle(new Vec3D(1,0,0), new Vec3D(1,1,1), new Vec3D(1,0,1), new Vec2D(0,0), new Vec2D(1,1), new Vec2D(1,0)),
+//           //NORTH
+//           new Triangle(new Vec3D(1,0,1), new Vec3D(1,1,1), new Vec3D(0,1,1), new Vec2D(0,0), new Vec2D(0,1), new Vec2D(1,1)),
+//           new Triangle(new Vec3D(1,0,1), new Vec3D(0,1,1), new Vec3D(0,0,1), new Vec2D(0,0), new Vec2D(1,1), new Vec2D(1,0)),
+//           //WEST
+//           new Triangle(new Vec3D(0,0,1), new Vec3D(0,1,1), new Vec3D(0,1,0), new Vec2D(0,0), new Vec2D(0,1), new Vec2D(1,1)),
+//           new Triangle(new Vec3D(0,0,1), new Vec3D(0,1,0), new Vec3D(0,0,0), new Vec2D(0,0), new Vec2D(1,1), new Vec2D(1,0)),
+//           //TOP
+//           new Triangle(new Vec3D(0,1,0), new Vec3D(0,1,1), new Vec3D(1,1,1), new Vec2D(0,0), new Vec2D(0,1), new Vec2D(1,1)),
+//           new Triangle(new Vec3D(0,1,0), new Vec3D(1,1,1), new Vec3D(1,1,0), new Vec2D(0,0), new Vec2D(1,1), new Vec2D(1,0)),
+//           //BOTTOM
+//           new Triangle(new Vec3D(1,0,1), new Vec3D(0,0,1), new Vec3D(0,0,0), new Vec2D(0,0), new Vec2D(0,1), new Vec2D(1,1)),
+//           new Triangle(new Vec3D(1,0,1), new Vec3D(0,0,0), new Vec3D(1,0,0), new Vec2D(0,0), new Vec2D(1,1), new Vec2D(1,0))
+//       }));
                  
     }
     
@@ -218,8 +228,9 @@ public class GamePanel extends JPanel implements Runnable
      {
         try
         {
-            img = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/t_1.png"));
             img2 = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/fight.png"));
+            img = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/t_1.png"));
+            
         }
         catch(IOException e)
         {
@@ -295,7 +306,7 @@ public class GamePanel extends JPanel implements Runnable
             for (int y=0;y<600;y++) {
                 boolean found=false;
                 if (!found) {
-                    pi[x + y * 800] = Color.gray.getRGB();
+                    pi[x + y * 800] = Color.black.getRGB();
                 }
             }
         }   
@@ -309,19 +320,90 @@ public class GamePanel extends JPanel implements Runnable
         
         Graphics2D g2 = (Graphics2D)g;
         
-        //fTheta += 0.02;
-        
+      
+        if(turn)
+        {
+            fTheta += 0.02;
+            
+            if(fTheta >= 1.0)
+            {
+                turn = false;
+            }
+        }
+        else
+        {
+            fTheta -= 0.02;
+            
+            if(fTheta <= -1.0)
+            {
+                turn = true;
+            }
+        }
+       
         //ROTATION MATRICES
-        matZ = mat.rotationMatrixZ(fTheta * 0.5);
-        matZX = mat.rotationMatrixX(fTheta);
+        matZ = mat.rotationMatrixZ(fTheta);
+        matZX = mat.rotationMatrixX(0);
+        
+          
+        Vec3D target = new Vec3D(100, -100, 800);
+        Vec3D target2 = new Vec3D(-600, 0, -3000);
+        
+        Vec3D[] tars = new Vec3D[2];
+        tars[0] = target;
+        tars[1] = target2;
+
+        Vec3D direction = target.subtractVector(tars[i], origin);
+        direction = target.normalize(direction);
+        
+        double dist = direction.vectorLength(direction);
+        
+        Vec3D velocity = direction.multiplyVector(direction, movementSpeed);
+        origin = direction.addVector(origin, velocity);
+        
+        double idealYaw = (Math.atan(800.00/100.00) + 90.00)/32.00;
+        double idealYaw2 = (Math.atan(-3000.00/-600.00) + 180.00)/30.00;
+        
+        double[] ideals = new double[2];
+        ideals[0] = idealYaw;
+        ideals[1] = idealYaw2;
+
+        
+        Matrix matYaw = mat.rotationMatrixY(ideals[i]);
+        
+        System.out.println(fTheta);
+        
+        //ACCELERATION
+        timer++;
+        
+        if(timer >= 90)
+        {
+            movementSpeed += 0.3;
+            timer = 0;
+        }
+        
+        //STOP MOVEMENT
+        if(origin.x - tars[i].x >= 0 && origin.x - tars[i].x <= 2)
+        {
+            if(i < 1)
+            {
+                i++;
+                movementSpeed -= 2.0;
+            }
+            else
+            {
+                i = 0;
+                movementSpeed -= 3.12;
+            }
+        }
         
         //TRANSLATION MATRIX
-        Matrix trans = mat.translationMatrix(0, 0, 16);
-        
+        Matrix trans = mat.translationMatrix(origin.x, origin.y, origin.z);
+ 
         //MATRIX MATRIX MULTIPLICATION TO ACCUMULATE MULITPLE TRANSFORMATIONS
         Matrix matWorld = new Matrix();
         matWorld = matWorld.identityMatrix();
         matWorld = matWorld.matrixMatrixMultiplication(matZ, matZX);
+        matWorld = matWorld.matrixMatrixMultiplication(matWorld, matYaw);
         matWorld = matWorld.matrixMatrixMultiplication(matWorld, trans);
         
         Vec3D vUp = new Vec3D(0,1,0);
@@ -339,40 +421,23 @@ public class GamePanel extends JPanel implements Runnable
         matView = matView.inverseMatrix(matCamera);
         
         List<Mesh> mesh = new ArrayList<>();
+       // mesh.add(meshShip);
         mesh.add(meshCube);
-        mesh.add(meshShip);
+
        // mesh.add(meshCube2);
-      //  mesh.add(meshCube3);
+       // mesh.add(meshCube3);
       //  mesh.add(meshCube4);
       //  mesh.add(meshCube5);
       //  mesh.add(meshDoor);
         
         List<Triangle> vecTrianglesToRaster = new ArrayList<>();
         
-        for(Triangle t: meshCube.triangles)
-        {
-            if(musicPlaying)
-            {
-                t.vec3d.z -= 0.5;
-                t.vec3d2.z -= 0.5;
-                t.vec3d3.z -= 0.5;
-            }  
-        }
-        
-        for(Triangle t: meshShip.triangles)
-        {
-            if(musicPlaying)
-            {
-                t.vec3d.z -= 0.25;
-                t.vec3d2.z -= 0.25;
-                t.vec3d3.z -= 0.25;
-            }
-        }
-        
         for(Mesh meshCube: mesh)
         {
+            vecTrianglesToRaster.clear();
+            
              for(Triangle tri: meshCube.triangles)
-            {
+            { 
                 Triangle triProjected = new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0));
                 Triangle triTrans = new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0));
                 Triangle triViewed = new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0));
@@ -432,7 +497,6 @@ public class GamePanel extends JPanel implements Runnable
                         triProjected.vec2d = clipped[i].vec2d;
                         triProjected.vec2d2 = clipped[i].vec2d2;
                         triProjected.vec2d3 = clipped[i].vec2d3;
-
 
                         //SCALE INTO VIEW
                         triProjected.vec3d.x += 1.0;
@@ -527,7 +591,7 @@ public class GamePanel extends JPanel implements Runnable
 
                    texturedTriangle(g2, (int)tt.vec3d.x,(int)tt.vec3d.y, tt.vec2d.u, tt.vec2d.v,(int)tt.vec3d2.x,(int)tt.vec3d2.y,
                     tt.vec2d2.u, tt.vec2d2.v,(int)tt.vec3d3.x,(int)tt.vec3d3.y, tt.vec2d3.u, tt.vec2d3.v,
-                    meshCube.img, visibility, true, pixels);
+                    meshCube.img, visibility, false, pixels);
 
 //                    g2.setColor(Color.black); 
 //                    drawTriangle(g2, tt.vec3d.x, tt.vec3d.y, tt.vec3d2.x,

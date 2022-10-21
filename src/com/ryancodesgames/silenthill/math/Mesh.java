@@ -22,10 +22,10 @@ public class Mesh
         this.triangles = tris;
     }
     
-    public Mesh(List<Triangle> tris, BufferedImage img)
+    public Mesh(List<Triangle> tris, BufferedImage im)
     {
         this.triangles = tris;
-        this.img = img;
+        this.img = im;
     }
     
     public Mesh()
