@@ -4,13 +4,14 @@ package com.ryancodesgames.silenthill.math;
 
 public class Vec3D 
 {
-    public double x, y, z;
+    public double x, y, z, w;
     
     public Vec3D(double x, double y, double z)
     {
         this.x = x;
         this.y = y;
         this.z = z;
+        this.w = 1;
     }
     
     public Vec3D addVector(Vec3D in, Vec3D in2)
@@ -152,10 +153,12 @@ public class Vec3D
             out[0].vec3d2 = vectorIntersectPlane(plane_p, plane_n, inside_points[0], outside_points[0], t);
             out[0].vec2d2.u = t.t * (outside_tex[0].u - inside_tex[0].u) + inside_tex[0].u;
             out[0].vec2d2.v = t.t * (outside_tex[0].v - inside_tex[0].v) + inside_tex[0].v;
+            out[0].vec2d2.w = t.t * (outside_tex[0].w - inside_tex[0].w) + inside_tex[0].w;
             
             out[0].vec3d3 = vectorIntersectPlane(plane_p, plane_n, inside_points[0], outside_points[1], t);
             out[0].vec2d3.u = t.t * (outside_tex[1].u - inside_tex[0].u) + inside_tex[0].u;
             out[0].vec2d3.v = t.t * (outside_tex[1].v - inside_tex[0].v) + inside_tex[0].v;
+            out[0].vec2d3.w = t.t * (outside_tex[1].w - inside_tex[0].w) + inside_tex[0].w;
             return 1;
         }
         
@@ -172,6 +175,7 @@ public class Vec3D
             out[0].vec3d3 = vectorIntersectPlane(plane_p, plane_n, inside_points[0], outside_points[0], t);
             out[0].vec2d3.u = t.t * (outside_tex[0].u - inside_tex[0].u) + inside_tex[0].u;
             out[0].vec2d3.v = t.t * (outside_tex[0].v - inside_tex[0].v) + inside_tex[0].v;
+            out[0].vec2d3.w = t.t * (outside_tex[0].w - inside_tex[0].w) + inside_tex[0].w;
             
             out[1].col = in.col;
             out[1].vec3d = inside_points[1];
@@ -181,6 +185,7 @@ public class Vec3D
             out[1].vec3d3 = vectorIntersectPlane(plane_p, plane_n, inside_points[1], outside_points[0], t);
             out[1].vec2d3.u = t.t * (outside_tex[0].u - inside_tex[1].u) + inside_tex[1].u;
             out[1].vec2d3.v = t.t * (outside_tex[0].v - inside_tex[1].v) + inside_tex[1].v;
+            out[1].vec2d3.w = t.t * (outside_tex[0].w - inside_tex[1].w) + inside_tex[1].w;
             return 2;
         }
         

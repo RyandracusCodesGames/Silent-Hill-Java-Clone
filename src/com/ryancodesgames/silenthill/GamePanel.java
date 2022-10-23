@@ -92,6 +92,7 @@ public class GamePanel extends JPanel implements Runnable
     Vec3D origin = new Vec3D(0,0,0);
     
     int timer = 0;
+    int time = 0;
     
     boolean turn = true;
 
@@ -217,7 +218,8 @@ public class GamePanel extends JPanel implements Runnable
         {
              pixels = new int[screenSize];
         }
-        
+        // This class is an implementation of the ImageProducer interface which uses an array 
+        // to produce pixel values for an Image.
         mImageProducer =  new MemoryImageSource(width, height, cm, pixels,0, width);
         mImageProducer.setAnimated(true);
         mImageProducer.setFullBufferUpdates(true);  
@@ -320,26 +322,30 @@ public class GamePanel extends JPanel implements Runnable
         
         Graphics2D g2 = (Graphics2D)g;
         
-      
-        if(turn)
+        time++;
+        
+        if(time >= 900)
         {
-            fTheta += 0.02;
-            
-            if(fTheta >= 1.0)
+            if(turn)
             {
-                turn = false;
+                fTheta += 0.02;
+            
+                if(fTheta >= 1.0)
+                {
+                    turn = false;
+                }
+            }
+            else
+            {
+                fTheta -= 0.02;
+
+                if(fTheta <= -1.0)
+                {
+                    turn = true;
+                }
             }
         }
-        else
-        {
-            fTheta -= 0.02;
-            
-            if(fTheta <= -1.0)
-            {
-                turn = true;
-            }
-        }
-       
+
         //ROTATION MATRICES
         matZ = mat.rotationMatrixZ(fTheta);
         matZX = mat.rotationMatrixX(0);
@@ -369,8 +375,6 @@ public class GamePanel extends JPanel implements Runnable
 
         
         Matrix matYaw = mat.rotationMatrixY(ideals[i]);
-        
-        System.out.println(fTheta);
         
         //ACCELERATION
         timer++;
@@ -497,6 +501,21 @@ public class GamePanel extends JPanel implements Runnable
                         triProjected.vec2d = clipped[i].vec2d;
                         triProjected.vec2d2 = clipped[i].vec2d2;
                         triProjected.vec2d3 = clipped[i].vec2d3;
+                        
+                        triProjected.vec2d.u = triProjected.vec2d.u/triProjected.vec3d.w;
+                        triProjected.vec2d2.u = triProjected.vec2d2.u/triProjected.vec3d2.w;
+                        triProjected.vec2d3.u = triProjected.vec2d3.u/triProjected.vec3d3.w;
+                        triProjected.vec2d.v = triProjected.vec2d.v/triProjected.vec3d.w;
+                        triProjected.vec2d2.v = triProjected.vec2d2.v/triProjected.vec3d2.w;
+                        triProjected.vec2d3.v = triProjected.vec2d3.v/triProjected.vec3d3.w;
+
+                        triProjected.vec2d.w = 1.0f/triProjected.vec3d.w;
+                        triProjected.vec2d2.w = 1.0f/triProjected.vec3d2.w;
+                        triProjected.vec2d3.w = 1.0f/triProjected.vec3d3.w;
+                        
+                        triProjected.vec3d = line1.divideVector(triProjected.vec3d, triProjected.vec3d.w);
+                        triProjected.vec3d2 = line1.divideVector(triProjected.vec3d2, triProjected.vec3d2.w);
+                        triProjected.vec3d3 = line1.divideVector(triProjected.vec3d3, triProjected.vec3d3.w);
 
                         //SCALE INTO VIEW
                         triProjected.vec3d.x += 1.0;
@@ -589,9 +608,12 @@ public class GamePanel extends JPanel implements Runnable
                     //tt.col = blend(backgroundColor, tt.col, (float)visibility);
 
 
-                   texturedTriangle(g2, (int)tt.vec3d.x,(int)tt.vec3d.y, tt.vec2d.u, tt.vec2d.v,(int)tt.vec3d2.x,(int)tt.vec3d2.y,
-                    tt.vec2d2.u, tt.vec2d2.v,(int)tt.vec3d3.x,(int)tt.vec3d3.y, tt.vec2d3.u, tt.vec2d3.v,
+                   texturedTriangle(g2, (int)tt.vec3d.x,(int)tt.vec3d.y, tt.vec2d.u, tt.vec2d.v, tt.vec2d.w,(int)tt.vec3d2.x,(int)tt.vec3d2.y,
+                   tt.vec2d2.u, tt.vec2d2.v, tt.vec2d.w, (int)tt.vec3d3.x,(int)tt.vec3d3.y, tt.vec2d3.u, tt.vec2d3.v, tt.vec2d3.w,
                     meshCube.img, visibility, false, pixels);
+                   
+                  // fillTriangle(pixels,(int)tt.vec3d.x,(int)tt.vec3d.y,(int)tt.vec3d2.x,(int)tt.vec3d2.y,
+                  // (int)tt.vec3d3.x,(int)tt.vec3d3.y,tt.col);
 
 //                    g2.setColor(Color.black); 
 //                    drawTriangle(g2, tt.vec3d.x, tt.vec3d.y, tt.vec3d2.x,
@@ -657,5 +679,4 @@ public class GamePanel extends JPanel implements Runnable
     {
         sound.stop();
     }
-  
 }

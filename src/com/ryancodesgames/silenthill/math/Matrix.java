@@ -19,19 +19,11 @@ public class Matrix
     {
         Vec3D out = new Vec3D(0,0,0);
         
-        out.x = in.x * m.matrix[0][0] + in.y * m.matrix[1][0] + in.z * m.matrix[2][0] + m.matrix[3][0];
-        out.y = in.x * m.matrix[0][1] + in.y * m.matrix[1][1] + in.z * m.matrix[2][1] + m.matrix[3][1];
-        out.z = in.x * m.matrix[0][2] + in.y * m.matrix[1][2] + in.z * m.matrix[2][2] + m.matrix[3][2];
-        
-        double w = in.x * m.matrix[0][3] + in.y * m.matrix[1][3] + in.z * m.matrix[2][3] + m.matrix[3][3];
-        
-        if(w != 0.0)
-        {
-            out.x /= w;
-            out.y /= w;
-            out.z /= w;
-        }
-        
+        out.x = in.x * m.matrix[0][0] + in.y * m.matrix[1][0] + in.z * m.matrix[2][0] + in.w * m.matrix[3][0];
+        out.y = in.x * m.matrix[0][1] + in.y * m.matrix[1][1] + in.z * m.matrix[2][1] + in.w * m.matrix[3][1];
+        out.z = in.x * m.matrix[0][2] + in.y * m.matrix[1][2] + in.z * m.matrix[2][2] + in.w * m.matrix[3][2]; 
+        out.w = in.x * m.matrix[0][3] + in.y * m.matrix[1][3] + in.z * m.matrix[2][3] + in.w * m.matrix[3][3];
+
         return out;
     }
     
