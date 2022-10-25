@@ -2,6 +2,7 @@
 package com.ryancodesgames.silenthill.math;
 
 import java.awt.Color;
+import java.awt.image.BufferedImage;
 
 
 public class Triangle 
@@ -11,6 +12,8 @@ public class Triangle
     public Vec2D vec2d, vec2d2, vec2d3;
     
     public Color col;
+    
+    public BufferedImage img = null;
     
     public Triangle(Vec3D vec3d, Vec3D vec3d2, Vec3D vec3d3)
     {

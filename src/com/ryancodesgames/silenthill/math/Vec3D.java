@@ -72,6 +72,63 @@ public class Vec3D
         return out;
     }
     
+    public void copyVector(Vec3D src, Vec3D dest)
+    {
+        dest.x = src.x;
+        dest.y = src.y;
+        dest.z = src.z;
+    }
+    
+    public Vec3D inverseVector(Vec3D in)
+    {
+        Vec3D out = new Vec3D(-in.x, -in.y, -in.z);
+        
+        return out;
+    }
+    
+    public Vec3D distance(Vec3D pos, Vec3D target)
+    {
+        Vec3D dist = subtractVector(target, pos);
+        dist = normalize(dist);
+        
+        return dist;
+    }
+    
+    public double dist(Vec3D pos, Vec3D target)
+    {
+        Vec3D dist = subtractVector(target, pos);
+        double distance = vectorLength(dist);
+        
+        return distance;
+    }
+
+    public boolean compareVector(Vec3D in, Vec3D in2)
+    {
+        if(in.x != in2.x)
+        {
+            return false;
+        }
+        else if(in.y != in2.y)
+        {
+            return false;
+        }
+        else return in.z == in2.z;
+        
+    }
+    
+    public boolean vectorsAreCloseEnough(Vec3D in, Vec3D in2)
+    {
+        if(Math.abs(in.x - in2.x) < 0.1)
+        {
+            return true;
+        }
+        else if(Math.abs(in.y - in2.y) < 0.1)
+        {
+            return true;
+        }
+        else return Math.abs(in.z - in2.z) < 0.1;
+    }
+    
     public double getAngle(Vec3D pos, Vec3D target)
     {
         double dot = dotProduct(pos, target);
@@ -145,6 +202,7 @@ public class Vec3D
         if(nInsidePointCount == 1 && nOutsidePointCount == 2)
         {
             out[0].col = in.col;
+            out[0].img = in.img;
             out[0].vec3d = inside_points[0];
             out[0].vec2d = inside_tex[0];
             
@@ -167,6 +225,7 @@ public class Vec3D
             ExtraData t = new ExtraData(0);
             
             out[0].col = in.col;
+            out[0].img = in.img;
             out[0].vec3d = inside_points[0];
             out[0].vec3d2 = inside_points[1];
             out[0].vec2d = inside_tex[0];
@@ -178,6 +237,7 @@ public class Vec3D
             out[0].vec2d3.w = t.t * (outside_tex[0].w - inside_tex[0].w) + inside_tex[0].w;
             
             out[1].col = in.col;
+            out[1].img = in.img;
             out[1].vec3d = inside_points[1];
             out[1].vec2d = inside_tex[1];
             out[1].vec3d2 = out[0].vec3d3; 

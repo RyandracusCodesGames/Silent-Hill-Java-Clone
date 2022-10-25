@@ -265,10 +265,8 @@ public class DrawUtils
          }
     }
     
-     public static void texturedTriangle(Graphics2D g2, int x1, int y1, double w1, 
-     double u1, double v1, int x2, int y2, double w2, double
-     u2, double v2, int x3, int y3, double w3, double u3, double v3,
-     BufferedImage img, double visibility, boolean fog, int[] pix)
+    public static void TexturedTriangle(Graphics2D g2, int x1, int y1, double u1, double v1, double w1, int x2, int y2, double
+    u2, double v2, double w2, int x3, int y3, double u3, double v3, double w3, BufferedImage img, double visibility, boolean fog, int[] pix, double[] zBuffer)
     {
        // short[] doubleBufferData;
       //  DataBuffer dest = img.getRaster().getDataBuffer();
@@ -308,6 +306,7 @@ public class DrawUtils
             double tempw = w1;
             w1 = w2;
             w2 = tempw;
+            
         }
         
         if(y3 < y1)
@@ -331,7 +330,6 @@ public class DrawUtils
             double tempw = w1;
             w1 = w3;
             w3 = tempw;
-   
         }
         
         if(y3 < y2)
@@ -355,6 +353,7 @@ public class DrawUtils
             double tempw = w2;
             w2 = w3;
             w3 = tempw;
+            
         }
         
         int dy1 = y2 - y1;
@@ -422,35 +421,38 @@ public class DrawUtils
                  tex_v = tex_sv;
                  tex_w = tex_sw;
                  
-                 double tstep = 1.0f / (float)(bx-ax);
-                 double t = 0.0f;
+                 double tstep = 1.0 / (float)(bx-ax);
+                 double t = 0.0;
 
                  
                  for(int j = ax; j < bx; j++)
                  {
-                     tex_u = (1.0f - t) * tex_su + t * tex_eu;
-                     tex_v = (1.0f - t) * tex_sv + t * tex_ev;
-                     tex_w = (1.0f - t) * tex_sw + t * tex_ew;
-                     
-                     Color background = Color.gray;
-//                     Color col = new Color(img.getRGB(
-//                          (int)Math.max(0,(tex_u)*(img.getWidth()-1)),
-//                          (int)Math.max(0,(tex_v)*(img.getHeight()-1))
-//                        ));
+                     tex_u = (1.0 - t) * tex_su + t * tex_eu;
+                     tex_v = (1.0 - t) * tex_sv + t * tex_ev;
+                     tex_w = (1.0 - t) * tex_sw + t * tex_ew;
 
-                     if(fog)
-                     {
-//                         col = blend(background, col,(float)visibility);
-//                         g2.setColor(col); 
-                     }
-                     
-                     else
-                     {
-                        // g2.setColor(new Color(getRGB((int)Math.max(0,tex_u*(img.getWidth()-1)),(int)Math.max(0,tex_v*(img.getHeight()-1)), width, height, pixelLength, pixels, hasAlphaChannel)));
-                     }
+                  
+                        Color background = Color.black;
+                        Color col = new Color(img.getRGB(
+                             (int)Math.max(0,tex_u/tex_w*(img.getWidth()-1)),
+                             (int)Math.max(0,tex_v/tex_w*(img.getHeight()-1))
+                           ));
+
+                        if(fog)
+                        {
+                            col = blend(background, col,(float)visibility);
+                            g2.setColor(col); 
+                        }
+
+                        else
+                        {
+                           // g2.setColor(new Color(getRGB((int)Math.max(0,tex_u*(img.getWidth()-1)),(int)Math.max(0,tex_v*(img.getHeight()-1)), width, height, pixelLength, pixels, hasAlphaChannel)));
+                        }
+
+
+                        draw(pix, j, i, col);
                     
-                      
-                     draw(pix, j, i, getColor(tex_u/tex_w, tex_v/tex_w, img));
+                    
                      
                      t += tstep;
                  }
@@ -463,12 +465,12 @@ public class DrawUtils
              dx1 = x3 - x2;
              dv1 = v3 - v2;
              du1 = u3 - u2;
-              dw1 = w3 - w2;
+             dw1 = w3 - w2;
              
              if (dy1 != 0) dax_step = dx1 / (float)Math.abs(dy1);
 	     if (dy2 != 0) dbx_step = dx2 / (float)Math.abs(dy2);
 
-             du1_step = 0; dv1_step = 0;
+             du1_step = 0; dv1_step = 0; dw1_step = 0;
              
              if (dy1 != 0) du1_step = du1 /(float)Math.abs(dy1);
              if (dy1 != 0) dv1_step = dv1 / (float)Math.abs(dy1);
@@ -521,25 +523,27 @@ public class DrawUtils
                      tex_v = (1.0 - t) * tex_sv + t * tex_ev;
                      tex_w = (1.0 - t) * tex_sw + t * tex_ew;
                      
-//                     Color background = Color.gray;
-//                     Color col = new Color(img.getRGB(
-//                          (int)Math.max(0,(tex_u)*(img.getWidth()-1)),
-//                          (int)Math.max(0,(tex_v)*(img.getHeight()-1))
-//                        ));
-//                     
-                    if(fog)
-                     {
-//                         col = blend(background, col,(float)visibility);
-//                         g2.setColor(col); 
-                     }
-                     
-                     else
-                     {
-                        // g2.setColor(new Color(getRGB((int)Math.max(0,tex_u*(img.getWidth()-1)),(int)Math.max(0,tex_v*(img.getHeight()-1)), width, height, pixelLength, pixels, hasAlphaChannel)));
-                     }
-                      
-                     draw(pix, j, i, getColor(tex_u/tex_w, tex_v/tex_w, img));
+                  
+                        Color background = Color.black;
+                        Color col = new Color(img.getRGB(
+                             (int)Math.max(0,tex_u/tex_w*(img.getWidth()-1)),
+                             (int)Math.max(0,tex_v/tex_w*(img.getHeight()-1))
+                           ));
 
+                        if(fog)
+                        {
+                            col = blend(background, col,(float)visibility);
+                            g2.setColor(col); 
+                        }
+
+                        else
+                        {
+                           // g2.setColor(new Color(getRGB((int)Math.max(0,tex_u*(img.getWidth()-1)),(int)Math.max(0,tex_v*(img.getHeight()-1)), width, height, pixelLength, pixels, hasAlphaChannel)));
+                        }
+
+
+                        draw(pix, j, i, col);
+ 
                      t += tstep;
                      
                  }
@@ -547,6 +551,7 @@ public class DrawUtils
 
          }
     }
+    
     
     public static Color blend( Color c1, Color c2, float ratio ) 
     {
@@ -748,21 +753,5 @@ public class DrawUtils
 			if (y>y3) return;
 		}
    }
-   
-   
-     public static Color getColor(double u, double v, BufferedImage tex) 
-     {
-        int sx = (int)(u*tex.getWidth()-1.0);
-        int sy = (int)(v*tex.getHeight()-1.0);
-        
-        if(sx < 0 || sx >= tex.getWidth() || sy < 0 || sy > tex.getWidth())
-        {
-            return new Color(0,0,0);
-        }
-      
-            return new Color(tex.getRGB(sx,sy));
-        
-    }
 
-   
 }

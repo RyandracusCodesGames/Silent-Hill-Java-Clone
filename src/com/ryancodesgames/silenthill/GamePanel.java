@@ -3,7 +3,7 @@ package com.ryancodesgames.silenthill;
 
 import com.ryancodesgames.silenthill.gameobject.Cube;
 import com.ryancodesgames.silenthill.gameobject.Pyramid;
-import static com.ryancodesgames.silenthill.gfx.DrawUtils.texturedTriangle;
+import static com.ryancodesgames.silenthill.gfx.DrawUtils.TexturedTriangle;
 import com.ryancodesgames.silenthill.math.Matrix;
 import com.ryancodesgames.silenthill.math.Mesh;
 import com.ryancodesgames.silenthill.math.Triangle;
@@ -55,7 +55,10 @@ public class GamePanel extends JPanel implements Runnable
     Mesh meshCube3;
     Mesh meshCube4;
     Mesh meshCube5;
-    Mesh meshDoor;
+    Mesh meshCube6;
+    Mesh meshCube7;
+    Mesh meshCube8;
+    Mesh meshCube9;
     Mesh meshShip;
     Mesh m =  new Mesh();
     //STATIONARY POSTION VECTOR THAT WILL SERVE AS THE CAMERA
@@ -65,10 +68,8 @@ public class GamePanel extends JPanel implements Runnable
     //ROTATION AROUND Y-AXIS FOR CAMERA
     double fYaw = 0;
     
-    BufferedImage img;
-    
-    BufferedImage img2;
-    
+    BufferedImage img, img2, img3, img4, img5;
+
     Pyramid pyramid = new Pyramid(-5, 10, 0, 10, 10, 10);
     
     Sound sound = new Sound();
@@ -80,6 +81,8 @@ public class GamePanel extends JPanel implements Runnable
     int i = 0;
     
     public int[] pixels;
+    
+    public double[] zBuffer = new double[800 * 600];
     
     private ColorModel cm;
     
@@ -95,6 +98,8 @@ public class GamePanel extends JPanel implements Runnable
     int time = 0;
     
     boolean turn = true;
+    
+      List<Mesh> mesh = new ArrayList<>();
 
     public GamePanel()
     {
@@ -162,24 +167,28 @@ public class GamePanel extends JPanel implements Runnable
         List<Triangle> tris2 = new ArrayList<>();
         
         tris = m.ReadOBJFile("yes.txt", true);
-        tris2 = m.ReadOBJFile("m.txt", true);
-        
+        tris2 = m.ReadOBJFile("lead.txt", true);
+
         meshCube = new Mesh(tris, img2);
         meshShip = new Mesh(tris2, img);
         
-//        
-        Cube cube = new Cube(0, 0, 0, 10, 10, 1);
-        Cube cube2 = new Cube(4.8, 0, 0, 0.2, 10, 10);
-        Cube cube3 = new Cube(-5, 0, 0, 10, 10, 0.2);
-        Cube cube4 = new Cube(-5, 0, 10, 10, 10, 0.2);
-        Cube cube5 = new Cube(-1, 0, 11, 2, 5, 0.1);
-            
-      //  meshCube = new Mesh(cube.meshCube.triangles, img2);
-        meshCube2 = new Mesh(cube2.meshCube.triangles);
-        meshCube3 = new Mesh(cube.meshCube.triangles, img);
-        meshCube4 = new Mesh(cube3.meshCube.triangles);
-        meshCube5 = new Mesh(cube4.meshCube.triangles);
-        meshDoor = new Mesh(cube5.meshCube.triangles);
+        mesh.add(meshShip);
+        mesh.add(meshCube);
+       
+////        
+//        Cube cube = new Cube(0, 0, 0, 20, 20, 1);
+//        Cube cube2 = new Cube(30, 0, 0, 20, 20, 1);
+//        Cube cube3 = new Cube(20, 0, 0, 10, 20, 1);
+//        Cube cube4 = new Cube(22.5, 4, 0, 5, 5, 0.2);
+//        Cube cube5 = new Cube(0, 0, -20, 1, 20, 20);
+//        Cube cube6 = new Cube(60, 0, -20, 1, 20, 20);
+//            
+//        meshCube = new Mesh(cube.meshCube.triangles, img2);
+//        meshCube2 = new Mesh(cube2.meshCube.triangles, img2);
+//        meshCube3 = new Mesh(cube3.meshCube.triangles, img4);
+//        meshCube4 = new Mesh(cube4.meshCube.triangles, img5);
+//        meshCube5 = new Mesh(cube5.meshCube.triangles, img3);
+//        meshCube6 = new Mesh(cube6.meshCube.triangles, img3);
 
 //        meshCube = new Mesh(Arrays.asList(
 //       new Triangle[]{
@@ -231,8 +240,7 @@ public class GamePanel extends JPanel implements Runnable
         try
         {
             img2 = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/fight.png"));
-            img = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/t_1.png"));
-            
+            img = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/h.png"));
         }
         catch(IOException e)
         {
@@ -312,14 +320,15 @@ public class GamePanel extends JPanel implements Runnable
                 }
             }
         }   
+        
 
         triangleCount = 0;
         
-        //FILL SCREEEN BLACK
-        Color backgroundColor = Color.black;
-        g.setColor(backgroundColor);
-        g.fillRect(0, 0, 800, 600);
-        
+//        //FILL SCREEEN BLACK
+//        Color backgroundColor = Color.black;
+//        g.setColor(backgroundColor);
+//        g.fillRect(0, 0, 800, 600);
+//        
         Graphics2D g2 = (Graphics2D)g;
         
         time++;
@@ -347,7 +356,7 @@ public class GamePanel extends JPanel implements Runnable
         }
 
         //ROTATION MATRICES
-        matZ = mat.rotationMatrixZ(fTheta);
+        matZ = mat.rotationMatrixZ(0);
         matZX = mat.rotationMatrixX(0);
         
           
@@ -364,7 +373,7 @@ public class GamePanel extends JPanel implements Runnable
         double dist = direction.vectorLength(direction);
         
         Vec3D velocity = direction.multiplyVector(direction, movementSpeed);
-        origin = direction.addVector(origin, velocity);
+        //origin = direction.addVector(origin, velocity);
         
         double idealYaw = (Math.atan(800.00/100.00) + 90.00)/32.00;
         double idealYaw2 = (Math.atan(-3000.00/-600.00) + 180.00)/30.00;
@@ -424,23 +433,18 @@ public class GamePanel extends JPanel implements Runnable
         Matrix matView = new Matrix(new double[][]{{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}});
         matView = matView.inverseMatrix(matCamera);
         
-        List<Mesh> mesh = new ArrayList<>();
-       // mesh.add(meshShip);
-        mesh.add(meshCube);
-
-       // mesh.add(meshCube2);
-       // mesh.add(meshCube3);
-      //  mesh.add(meshCube4);
-      //  mesh.add(meshCube5);
-      //  mesh.add(meshDoor);
+      
+//        mesh.add(meshCube2);
+//        mesh.add(meshCube3);
+//        mesh.add(meshCube4);
+//        mesh.add(meshCube5);
+//        mesh.add(meshCube6);
         
         List<Triangle> vecTrianglesToRaster = new ArrayList<>();
         
-        for(Mesh meshCube: mesh)
-        {
-            vecTrianglesToRaster.clear();
-            
-             for(Triangle tri: meshCube.triangles)
+        for(Mesh m: mesh)
+        {         
+             for(Triangle tri: m.triangles)
             { 
                 Triangle triProjected = new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0));
                 Triangle triTrans = new Triangle(new Vec3D(0,0,0), new Vec3D(0,0,0), new Vec3D(0,0,0));
@@ -498,9 +502,9 @@ public class GamePanel extends JPanel implements Runnable
                         triProjected.vec3d = mat.multiplyMatrixVector(clipped[i].vec3d, matProj);
                         triProjected.vec3d2 = mat.multiplyMatrixVector(clipped[i].vec3d2, matProj);
                         triProjected.vec3d3 = mat.multiplyMatrixVector(clipped[i].vec3d3, matProj);
-                        triProjected.vec2d = clipped[i].vec2d;
-                        triProjected.vec2d2 = clipped[i].vec2d2;
-                        triProjected.vec2d3 = clipped[i].vec2d3;
+                        triProjected.vec2d = (Vec2D)clipped[i].vec2d.clone();
+                        triProjected.vec2d2 = (Vec2D)clipped[i].vec2d2.clone();
+                        triProjected.vec2d3 = (Vec2D)clipped[i].vec2d3.clone();
                         
                         triProjected.vec2d.u = triProjected.vec2d.u/triProjected.vec3d.w;
                         triProjected.vec2d2.u = triProjected.vec2d2.u/triProjected.vec3d2.w;
@@ -509,9 +513,9 @@ public class GamePanel extends JPanel implements Runnable
                         triProjected.vec2d2.v = triProjected.vec2d2.v/triProjected.vec3d2.w;
                         triProjected.vec2d3.v = triProjected.vec2d3.v/triProjected.vec3d3.w;
 
-                        triProjected.vec2d.w = 1.0f/triProjected.vec3d.w;
-                        triProjected.vec2d2.w = 1.0f/triProjected.vec3d2.w;
-                        triProjected.vec2d3.w = 1.0f/triProjected.vec3d3.w;
+                        triProjected.vec2d.w = 1.0/triProjected.vec3d.w;
+                        triProjected.vec2d2.w = 1.0/triProjected.vec3d2.w;
+                        triProjected.vec2d3.w = 1.0/triProjected.vec3d3.w;
                         
                         triProjected.vec3d = line1.divideVector(triProjected.vec3d, triProjected.vec3d.w);
                         triProjected.vec3d2 = line1.divideVector(triProjected.vec3d2, triProjected.vec3d2.w);
@@ -533,13 +537,14 @@ public class GamePanel extends JPanel implements Runnable
                         triProjected.vec3d3.y *= 0.5 * 600;
 
                         triProjected.color((int)Math.abs(dp*255),(int)Math.abs(dp*255),(int)Math.abs(dp*255));
-
+                        triProjected.img = m.img;
+                        
                         vecTrianglesToRaster.add(triProjected);
                   }
 
                 }
             }    
-
+//
             Collections.sort((ArrayList<Triangle>)vecTrianglesToRaster, new Comparator<Triangle>() {
                     @Override
                     public int compare(Triangle t1, Triangle t2) {
@@ -608,9 +613,14 @@ public class GamePanel extends JPanel implements Runnable
                     //tt.col = blend(backgroundColor, tt.col, (float)visibility);
 
 
-                   texturedTriangle(g2, (int)tt.vec3d.x,(int)tt.vec3d.y, tt.vec2d.u, tt.vec2d.v, tt.vec2d.w,(int)tt.vec3d2.x,(int)tt.vec3d2.y,
-                   tt.vec2d2.u, tt.vec2d2.v, tt.vec2d.w, (int)tt.vec3d3.x,(int)tt.vec3d3.y, tt.vec2d3.u, tt.vec2d3.v, tt.vec2d3.w,
-                    meshCube.img, visibility, false, pixels);
+//                   texturedTriangle(g2, (int)tt.vec3d.x,(int)tt.vec3d.y, tt.vec2d.u, tt.vec2d.v,(int)tt.vec3d2.x,(int)tt.vec3d2.y,
+//                   tt.vec2d2.u, tt.vec2d2.v,(int)tt.vec3d3.x,(int)tt.vec3d3.y, tt.vec2d3.u, tt.vec2d3.v,
+//                    meshCube.img, visibility, false, pixels);
+                    
+                    TexturedTriangle(g2, (int)tt.vec3d.x,(int)tt.vec3d.y, tt.vec2d.u, tt.vec2d.v,tt.vec2d.w,
+                            (int)tt.vec3d2.x,(int)tt.vec3d2.y, tt.vec2d2.u, tt.vec2d2.v, tt.vec2d2.w,
+                            (int)tt.vec3d3.x,(int)tt.vec3d3.y, tt.vec2d3.u, tt.vec2d3.v, tt.vec2d3.w,
+                    tt.img, visibility, false, pixels, zBuffer);
                    
                   // fillTriangle(pixels,(int)tt.vec3d.x,(int)tt.vec3d.y,(int)tt.vec3d2.x,(int)tt.vec3d2.y,
                   // (int)tt.vec3d3.x,(int)tt.vec3d3.y,tt.col);
