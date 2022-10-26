@@ -427,13 +427,14 @@ public class DrawUtils
                  
                  for(int j = ax; j < bx; j++)
                  {
-                     tex_u = (1.0 - t) * tex_su + t * tex_eu;
-                     tex_v = (1.0 - t) * tex_sv + t * tex_ev;
-                     tex_w = (1.0 - t) * tex_sw + t * tex_ew;
+                    tex_u = (1.0 - t) * tex_su + t * tex_eu;
+                    tex_v = (1.0 - t) * tex_sv + t * tex_ev;
+                    tex_w = (1.0 - t) * tex_sw + t * tex_ew;
 
-                  
-                        Color background = Color.black;
-                        Color col = new Color(img.getRGB(
+                    if(Math.abs(tex_w) > zBuffer[i * 800 + j])
+                    {
+                         Color background = Color.black;
+                         Color col = new Color(img.getRGB(
                              (int)Math.max(0,tex_u/tex_w*(img.getWidth()-1)),
                              (int)Math.max(0,tex_v/tex_w*(img.getHeight()-1))
                            ));
@@ -451,10 +452,10 @@ public class DrawUtils
 
 
                         draw(pix, j, i, col);
-                    
-                    
-                     
-                     t += tstep;
+                        zBuffer[i * 800 + j] = Math.abs(tex_w);
+                    }
+                        
+                    t += tstep;
                  }
 
              }
@@ -522,10 +523,10 @@ public class DrawUtils
                      tex_u = (1.0 - t) * tex_su + t * tex_eu;
                      tex_v = (1.0 - t) * tex_sv + t * tex_ev;
                      tex_w = (1.0 - t) * tex_sw + t * tex_ew;
-                     
-                  
-                        Color background = Color.black;
-                        Color col = new Color(img.getRGB(
+                      if(Math.abs(tex_w) > zBuffer[i * 800 + j])
+                    {
+                         Color background = Color.black;
+                         Color col = new Color(img.getRGB(
                              (int)Math.max(0,tex_u/tex_w*(img.getWidth()-1)),
                              (int)Math.max(0,tex_v/tex_w*(img.getHeight()-1))
                            ));
@@ -543,7 +544,8 @@ public class DrawUtils
 
 
                         draw(pix, j, i, col);
- 
+                        zBuffer[i * 800 + j] = Math.abs(tex_w);
+                    }
                      t += tstep;
                      
                  }

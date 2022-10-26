@@ -1,11 +1,11 @@
 
 package com.ryancodesgames.silenthill;
 
-import com.ryancodesgames.silenthill.gameobject.Cube;
 import com.ryancodesgames.silenthill.gameobject.Pyramid;
 import static com.ryancodesgames.silenthill.gfx.DrawUtils.TexturedTriangle;
 import com.ryancodesgames.silenthill.math.Matrix;
 import com.ryancodesgames.silenthill.math.Mesh;
+import com.ryancodesgames.silenthill.math.Transformation;
 import com.ryancodesgames.silenthill.math.Triangle;
 import com.ryancodesgames.silenthill.math.Vec2D;
 import com.ryancodesgames.silenthill.math.Vec3D;
@@ -23,8 +23,6 @@ import java.awt.image.ColorModel;
 import java.awt.image.MemoryImageSource;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import javax.imageio.ImageIO;
@@ -67,6 +65,8 @@ public class GamePanel extends JPanel implements Runnable
     Vec3D vLookDir = new Vec3D(0,0,1);
     //ROTATION AROUND Y-AXIS FOR CAMERA
     double fYaw = 0;
+    //TRANSFORMATION DATA
+    Transformation t = new Transformation();
     
     BufferedImage img, img2, img3, img4, img5;
 
@@ -79,17 +79,13 @@ public class GamePanel extends JPanel implements Runnable
     int triangleCount = 0;
     
     int i = 0;
-    
+    //GRAPHICS DATA
     public int[] pixels;
-    
     public double[] zBuffer = new double[800 * 600];
-    
     private ColorModel cm;
-    
     private MemoryImageSource mImageProducer;
-    
     private Image imageBuffer;
-    
+    //
     double movementSpeed = 0.3;
 
     Vec3D origin = new Vec3D(0,0,0);
@@ -99,7 +95,7 @@ public class GamePanel extends JPanel implements Runnable
     
     boolean turn = true;
     
-      List<Mesh> mesh = new ArrayList<>();
+    List<Mesh> mesh = new ArrayList<>();
 
     public GamePanel()
     {
@@ -167,13 +163,13 @@ public class GamePanel extends JPanel implements Runnable
         List<Triangle> tris2 = new ArrayList<>();
         
         tris = m.ReadOBJFile("yes.txt", true);
-        tris2 = m.ReadOBJFile("lead.txt", true);
+        tris2 = m.ReadOBJFile("m.txt", true);
 
         meshCube = new Mesh(tris, img2);
         meshShip = new Mesh(tris2, img);
         
         mesh.add(meshShip);
-        mesh.add(meshCube);
+       // mesh.add(meshCube);
        
 ////        
 //        Cube cube = new Cube(0, 0, 0, 20, 20, 1);
@@ -240,7 +236,7 @@ public class GamePanel extends JPanel implements Runnable
         try
         {
             img2 = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/fight.png"));
-            img = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/h.png"));
+            img = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/t_1.png"));
         }
         catch(IOException e)
         {
@@ -301,6 +297,7 @@ public class GamePanel extends JPanel implements Runnable
         {
             fYaw += 0.008;
         }
+        
 
     }
     
@@ -320,10 +317,9 @@ public class GamePanel extends JPanel implements Runnable
                 }
             }
         }   
-        
 
         triangleCount = 0;
-        
+
 //        //FILL SCREEEN BLACK
 //        Color backgroundColor = Color.black;
 //        g.setColor(backgroundColor);
@@ -358,8 +354,7 @@ public class GamePanel extends JPanel implements Runnable
         //ROTATION MATRICES
         matZ = mat.rotationMatrixZ(0);
         matZX = mat.rotationMatrixX(0);
-        
-          
+         
         Vec3D target = new Vec3D(100, -100, 800);
         Vec3D target2 = new Vec3D(-600, 0, -3000);
         
@@ -373,7 +368,7 @@ public class GamePanel extends JPanel implements Runnable
         double dist = direction.vectorLength(direction);
         
         Vec3D velocity = direction.multiplyVector(direction, movementSpeed);
-        //origin = direction.addVector(origin, velocity);
+        origin = direction.addVector(origin, velocity);
         
         double idealYaw = (Math.atan(800.00/100.00) + 90.00)/32.00;
         double idealYaw2 = (Math.atan(-3000.00/-600.00) + 180.00)/30.00;
@@ -408,16 +403,15 @@ public class GamePanel extends JPanel implements Runnable
                 movementSpeed -= 3.12;
             }
         }
+        t.setRotAngleZ(fTheta);
+        t.setRotAngleX(0);
+        t.setRotAngleY(ideals[i]);
         
-        //TRANSLATION MATRIX
-        Matrix trans = mat.translationMatrix(origin.x, origin.y, origin.z);
- 
-        //MATRIX MATRIX MULTIPLICATION TO ACCUMULATE MULITPLE TRANSFORMATIONS
-        Matrix matWorld = new Matrix();
-        matWorld = matWorld.identityMatrix();
-        matWorld = matWorld.matrixMatrixMultiplication(matZ, matZX);
-        matWorld = matWorld.matrixMatrixMultiplication(matWorld, matYaw);
-        matWorld = matWorld.matrixMatrixMultiplication(matWorld, trans);
+        t.setTransX(origin.x);
+        t.setTransY(origin.y);
+        t.setTransZ(origin.z);
+  
+        Matrix matWorld = t.getWorldMatrix();
         
         Vec3D vUp = new Vec3D(0,1,0);
         Vec3D vTarget = new Vec3D(0,0,1);
@@ -545,14 +539,19 @@ public class GamePanel extends JPanel implements Runnable
                 }
             }    
 //
-            Collections.sort((ArrayList<Triangle>)vecTrianglesToRaster, new Comparator<Triangle>() {
-                    @Override
-                    public int compare(Triangle t1, Triangle t2) {
-                        double z1=(t1.vec3d.z+t1.vec3d2.z+t1.vec3d3.z)/3.0;
-                        double z2=(t2.vec3d.z+t2.vec3d2.z+t2.vec3d3.z)/3.0;
-                        return (z1<z2)?1:(z1==z2)?0:-1;
-                    }
-                });
+//            Collections.sort((ArrayList<Triangle>)vecTrianglesToRaster, new Comparator<Triangle>() {
+//                    @Override
+//                    public int compare(Triangle t1, Triangle t2) {
+//                        double z1=(t1.vec3d.z+t1.vec3d2.z+t1.vec3d3.z)/3.0;
+//                        double z2=(t2.vec3d.z+t2.vec3d2.z+t2.vec3d3.z)/3.0;
+//                        return (z1<z2)?1:(z1==z2)?0:-1;
+//                    }
+//                });
+            
+            for(int i = 0; i < 800 * 600; i++)
+            {
+                zBuffer[i] = 0.0;
+            }
 
            for(Triangle t: vecTrianglesToRaster)
             {
@@ -649,7 +648,7 @@ public class GamePanel extends JPanel implements Runnable
         
             // ask ImageProducer to update image
             mImageProducer.newPixels();            
-        // draw it on panel          
+        // draw it on panel     
             g2.drawImage(this.imageBuffer, 0, 0, this);
             
             g2.setColor(Color.green);

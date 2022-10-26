@@ -17,6 +17,8 @@ public class Mesh
     
     public BufferedImage img;
     
+    public Transformation transformation;
+    
     public Mesh(List<Triangle> tris)
     {
         this.triangles = tris;
@@ -32,9 +34,7 @@ public class Mesh
     {
         
     }
-    
-    
-    
+
     public static String[] readFromFile(String filename) {
 		File file = new File(filename);
 		//System.out.println(file.getAbsolutePath());

@@ -116,17 +116,30 @@ public class Vec3D
         
     }
     
-    public boolean vectorsAreCloseEnough(Vec3D in, Vec3D in2)
+    public boolean vectorsAreCloseEnough(Vec3D in, Vec3D in2, double err)
     {
-        if(Math.abs(in.x - in2.x) < 0.1)
+        if(Math.abs(in.x - in2.x) < err)
         {
             return true;
         }
-        else if(Math.abs(in.y - in2.y) < 0.1)
+        else if(Math.abs(in.y - in2.y) < err)
         {
             return true;
         }
-        else return Math.abs(in.z - in2.z) < 0.1;
+        else return Math.abs(in.z - in2.z) < err;
+    }
+    
+    public double findIdealYaw(Vec3D pos, Vec3D target)
+    {
+        if((target.z - pos.z) > 0 && (target.x - pos.x) > 0)
+        {
+            return Math.atan((target.z - pos.z)/(target.x - pos.x) + 90.00) / 32.00;
+        }
+        else if((target.z - pos.z) > 0 && (target.x - pos.x) < 0)
+        {
+            return Math.atan((target.z - pos.z)/(target.x - pos.x) + (90.00 + 45.00)) / 32.00;
+        }
+        else return Math.atan((target.z - pos.z)/(target.x - pos.x) + 180.00) / 32.00;
     }
     
     public double getAngle(Vec3D pos, Vec3D target)
