@@ -133,7 +133,7 @@ public class GamePanel extends JPanel implements Runnable
             
             delta += (currentTime - lastTime)/drawInterval;
             timer += (currentTime - lastTime);
-            
+
             lastTime = currentTime;
             
             if(delta >= 1)
@@ -644,7 +644,7 @@ public class GamePanel extends JPanel implements Runnable
                     TexturedTriangle(g2, (int)tt.vec3d.x,(int)tt.vec3d.y, tt.vec2d.u, tt.vec2d.v,tt.vec2d.w,
                             (int)tt.vec3d2.x,(int)tt.vec3d2.y, tt.vec2d2.u, tt.vec2d2.v, tt.vec2d2.w,
                             (int)tt.vec3d3.x,(int)tt.vec3d3.y, tt.vec2d3.u, tt.vec2d3.v, tt.vec2d3.w,
-                    tt.img, tex, visibility, false, pixels, zBuffer, video);
+                    tt.img,tex,visibility, false, pixels, zBuffer, video);
 
                   // fillTriangle(pixels,(int)tt.vec3d.x,(int)tt.vec3d.y,(int)tt.vec3d2.x,(int)tt.vec3d2.y,
                   // (int)tt.vec3d3.x,(int)tt.vec3d3.y,tt.col);

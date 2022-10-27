@@ -433,14 +433,9 @@ public class DrawUtils
 
                     if(Math.abs(tex_w) > zBuffer[i * 800 + j])
                     {
-                        //THIS IS HOW I GRABBED RGB'S FROM COLOR CLASS BUT IS A BIT INCORRECT NOW
-                        //I DON'T KNOW HOW TO GRAB THE RIGHT RGB'S VALUES ANYMORE
-
-                        int iu = (int) (tex_u / tex_w) & tex.getWidthMask();
-                        int iv = (int) (tex_v / tex_w) & tex.getHeightMask();
-                        
-                        int col = texArray[iu + iv * tex.getWidth()];
-                        
+                        int iu = (int) ((tex_u / tex_w) * tex.getWidth()) & tex.getWidthMask();
+                        int iv = (int) ((tex_v / tex_w) * tex.getHeight()) & tex.getHeightMask();
+                        int col = tex.getTexArray()[iu + (iv << tex.getWidthShift())];
                         if(fog)
                         {
                             
@@ -526,12 +521,10 @@ public class DrawUtils
                      tex_w = (1.0 - t) * tex_sw + t * tex_ew;
                       if(Math.abs(tex_w) > zBuffer[i * 800 + j])
                     {
-                        
-                        int iu = (int) (tex_u / tex_w) & tex.getWidthMask();
-                        int iv = (int) (tex_v / tex_w) & tex.getHeightMask();
-                        
-                        int col = texArray[iu + iv * tex.getWidth()];
-                        
+                        int iu = (int) ((tex_u / tex_w) * tex.getWidth()) & tex.getWidthMask();
+                        int iv = (int) ((tex_v / tex_w) * tex.getHeight()) & tex.getHeightMask();
+                        int col = tex.getTexArray()[iu + (iv << tex.getWidthShift())];
+
                         if(fog)
                         {
                             

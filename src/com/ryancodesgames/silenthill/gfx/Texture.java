@@ -3,6 +3,7 @@ package com.ryancodesgames.silenthill.gfx;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 
@@ -12,6 +13,7 @@ public class Texture
     private int height;
     private int widthMask;
     private int heightMask;
+    private int widthShift;
     private int[] texArray;
     
     public Texture(BufferedImage img)
@@ -32,7 +34,11 @@ public class Texture
                 g.dispose();
                 img = newImage;
         }
-    }
+        texArray = ((DataBufferInt)img.getRaster().getDataBuffer()).getData();
+        widthMask = img.getWidth() - 1;
+        heightMask = img.getHeight() - 1;
+        widthShift = countbits(getWidth()-1);
+        }
     
     public void createTexture(String fileName)
     {
@@ -60,6 +66,10 @@ public class Texture
                 g.dispose();
                 img = newImage;
         }
+        texArray = ((DataBufferInt)img.getRaster().getDataBuffer()).getData();
+        widthMask = img.getWidth() - 1;
+        heightMask = img.getHeight() - 1;
+        widthShift = countbits(getWidth()-1);
     }
     
     public int getWidth()
@@ -119,17 +129,8 @@ public class Texture
     }
     
     public int getWidthShift()
-    {
-        int shift = countbits(getWidth());
-        
-        return shift;
-    }
-    
-    public int getHeightShift()
-    {
-        int shift = countbits(getHeight());
-        
-        return shift;
+    {        
+        return widthShift;
     }
 
 }
