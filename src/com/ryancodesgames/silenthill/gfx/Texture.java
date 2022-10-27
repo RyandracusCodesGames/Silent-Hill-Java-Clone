@@ -125,9 +125,9 @@ public class Texture
         return shift;
     }
     
-    public static int getHeightShift(BufferedImage img)
+    public int getHeightShift()
     {
-        int shift = countbits(img.getHeight());
+        int shift = countbits(getHeight());
         
         return shift;
     }

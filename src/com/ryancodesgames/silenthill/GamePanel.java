@@ -3,6 +3,7 @@ package com.ryancodesgames.silenthill;
 
 import com.ryancodesgames.silenthill.gameobject.Pyramid;
 import static com.ryancodesgames.silenthill.gfx.DrawUtils.TexturedTriangle;
+import com.ryancodesgames.silenthill.gfx.Texture;
 import com.ryancodesgames.silenthill.math.Matrix;
 import com.ryancodesgames.silenthill.math.Mesh;
 import com.ryancodesgames.silenthill.math.Transformation;
@@ -98,6 +99,8 @@ public class GamePanel extends JPanel implements Runnable
     boolean turn = true;
     
     List<Mesh> mesh = new ArrayList<>();
+    
+    Texture tex;
 
     public GamePanel()
     {
@@ -180,6 +183,8 @@ public class GamePanel extends JPanel implements Runnable
             }
         
         video = ((DataBufferInt)img.getRaster().getDataBuffer()).getData();
+        
+        tex = new Texture(img);
 
         mesh.add(meshShip);
         //mesh.add(meshCube);
@@ -639,7 +644,7 @@ public class GamePanel extends JPanel implements Runnable
                     TexturedTriangle(g2, (int)tt.vec3d.x,(int)tt.vec3d.y, tt.vec2d.u, tt.vec2d.v,tt.vec2d.w,
                             (int)tt.vec3d2.x,(int)tt.vec3d2.y, tt.vec2d2.u, tt.vec2d2.v, tt.vec2d2.w,
                             (int)tt.vec3d3.x,(int)tt.vec3d3.y, tt.vec2d3.u, tt.vec2d3.v, tt.vec2d3.w,
-                    tt.img, visibility, false, pixels, zBuffer, video);
+                    tt.img, tex, visibility, false, pixels, zBuffer, video);
 
                   // fillTriangle(pixels,(int)tt.vec3d.x,(int)tt.vec3d.y,(int)tt.vec3d2.x,(int)tt.vec3d2.y,
                   // (int)tt.vec3d3.x,(int)tt.vec3d3.y,tt.col);

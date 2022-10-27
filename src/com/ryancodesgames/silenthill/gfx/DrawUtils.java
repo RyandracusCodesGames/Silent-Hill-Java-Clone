@@ -266,7 +266,7 @@ public class DrawUtils
     }
     
     public static void TexturedTriangle(Graphics2D g2, int x1, int y1, double u1, double v1, double w1, int x2, int y2, double
-    u2, double v2, double w2, int x3, int y3, double u3, double v3, double w3, BufferedImage img, double visibility, boolean fog, int[] pix, double[] zBuffer, int[] texArray)
+    u2, double v2, double w2, int x3, int y3, double u3, double v3, double w3, BufferedImage img, Texture tex, double visibility, boolean fog, int[] pix, double[] zBuffer, int[] texArray)
     {
 //        short[] doubleBufferData;
 //        DataBuffer dest = img.getRaster().getDataBuffer();
@@ -433,12 +433,14 @@ public class DrawUtils
 
                     if(Math.abs(tex_w) > zBuffer[i * 800 + j])
                     {
-                        int iu = (int)(tex_u/tex_w) & getWidthShift(img);
-                        int iv = (int)(tex_v/tex_w) & getHeightShift(img);
                         //THIS IS HOW I GRABBED RGB'S FROM COLOR CLASS BUT IS A BIT INCORRECT NOW
                         //I DON'T KNOW HOW TO GRAB THE RIGHT RGB'S VALUES ANYMORE
-                        int col = texArray[iu + iv * img.getWidth()];
 
+                        int iu = (int) (tex_u / tex_w) & tex.getWidthMask();
+                        int iv = (int) (tex_v / tex_w) & tex.getHeightMask();
+                        
+                        int col = texArray[iu + iv * tex.getWidth()];
+                        
                         if(fog)
                         {
                             
@@ -525,11 +527,11 @@ public class DrawUtils
                       if(Math.abs(tex_w) > zBuffer[i * 800 + j])
                     {
                         
-                        int iu = (int)(tex_u/tex_w) & getWidthShift(img);
-                        int iv = (int)(tex_v/tex_w) & getHeightShift(img);
-                        //THIS IS HOW I GRABBED RGB'S FROM COLOR CLASS BUT IS A BIT INCORRECT NOW
-                        //I DON'T KNOW HOW TO GRAB THE RIGHT RGB'S VALUES ANYMORE
-                        int col = texArray[iu + iv * img.getWidth()];
+                        int iu = (int) (tex_u / tex_w) & tex.getWidthMask();
+                        int iv = (int) (tex_v / tex_w) & tex.getHeightMask();
+                        
+                        int col = texArray[iu + iv * tex.getWidth()];
+                        
                         if(fog)
                         {
                             
