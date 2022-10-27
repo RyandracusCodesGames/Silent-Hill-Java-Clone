@@ -20,6 +20,7 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
+import java.awt.image.DataBufferInt;
 import java.awt.image.MemoryImageSource;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ public class GamePanel extends JPanel implements Runnable
     //TRANSFORMATION DATA
     Transformation t = new Transformation();
     
-    BufferedImage img, img2, img3, img4, img5;
+    BufferedImage img, img2, img3, img4, img5, img6;
 
     Pyramid pyramid = new Pyramid(-5, 10, 0, 10, 10, 10);
     
@@ -81,6 +82,7 @@ public class GamePanel extends JPanel implements Runnable
     int i = 0;
     //GRAPHICS DATA
     public int[] pixels;
+    public int[] video;
     public double[] zBuffer = new double[800 * 600];
     private ColorModel cm;
     private MemoryImageSource mImageProducer;
@@ -145,6 +147,7 @@ public class GamePanel extends JPanel implements Runnable
                 timer = 0;
             }
         }
+
     }
     
      protected static ColorModel getCompatibleColorModel(){        
@@ -163,21 +166,44 @@ public class GamePanel extends JPanel implements Runnable
         List<Triangle> tris2 = new ArrayList<>();
         
         tris = m.ReadOBJFile("yes.txt", true);
-        tris2 = m.ReadOBJFile("m.txt", true);
+        tris2 = m.ReadOBJFile("lead.txt", true);
 
         meshCube = new Mesh(tris, img2);
         meshShip = new Mesh(tris2, img);
         
+        if (img.getType() != BufferedImage.TYPE_INT_RGB) {
+        BufferedImage newImage = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+                Graphics2D g = newImage.createGraphics();
+                g.drawImage(img, 0, 0, null);
+                g.dispose();
+                img = newImage;
+            }
+        
+        video = ((DataBufferInt)img.getRaster().getDataBuffer()).getData();
+
         mesh.add(meshShip);
-       // mesh.add(meshCube);
-       
-////        
+        //mesh.add(meshCube);
+    
 //        Cube cube = new Cube(0, 0, 0, 20, 20, 1);
 //        Cube cube2 = new Cube(30, 0, 0, 20, 20, 1);
 //        Cube cube3 = new Cube(20, 0, 0, 10, 20, 1);
-//        Cube cube4 = new Cube(22.5, 4, 0, 5, 5, 0.2);
-//        Cube cube5 = new Cube(0, 0, -20, 1, 20, 20);
-//        Cube cube6 = new Cube(60, 0, -20, 1, 20, 20);
+//        Cube cube4 = new Cube(22.5, 4, -0.1, 5, 5, 0.2);
+//        Cube cube5 = new Cube(0, 0, 0, 1, 20, 20);
+//        Cube cube6 = new Cube(50, 0, 0, 1, 20, 20);
+//        
+//        Mesh meshWall = new Mesh(cube.meshCube.triangles, img3);
+//        Mesh meshWall2 = new Mesh(cube2.meshCube.triangles, img4);
+//        Mesh meshWall3 = new Mesh(cube3.meshCube.triangles, img5);
+//        Mesh meshWall4 = new Mesh(cube4.meshCube.triangles, img6);
+//        Mesh meshWall5 = new Mesh(cube5.meshCube.triangles, img4);
+//        Mesh meshWall6 = new Mesh(cube6.meshCube.triangles, img4);
+//        
+//        mesh.add(meshWall);
+//        mesh.add(meshWall2);
+//        mesh.add(meshWall3);
+//        mesh.add(meshWall4);
+//        mesh.add(meshWall5);
+//        mesh.add(meshWall6);
 //            
 //        meshCube = new Mesh(cube.meshCube.triangles, img2);
 //        meshCube2 = new Mesh(cube2.meshCube.triangles, img2);
@@ -235,8 +261,13 @@ public class GamePanel extends JPanel implements Runnable
      {
         try
         {
+            img = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/hh.png"));
             img2 = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/fight.png"));
-            img = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/t_1.png"));
+            img3 = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/wall.png"));
+            img4 = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/wall2.png"));
+            img5 = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/door.png"));
+            img6 = ImageIO.read(getClass().getResource("/com/ryancodesgames/silenthill/gfx/yo.png"));
+
         }
         catch(IOException e)
         {
@@ -298,7 +329,6 @@ public class GamePanel extends JPanel implements Runnable
             fYaw += 0.008;
         }
         
-
     }
     
     public void paintComponent(Graphics g)
@@ -368,7 +398,7 @@ public class GamePanel extends JPanel implements Runnable
         double dist = direction.vectorLength(direction);
         
         Vec3D velocity = direction.multiplyVector(direction, movementSpeed);
-        origin = direction.addVector(origin, velocity);
+       // origin = direction.addVector(origin, velocity);
         
         double idealYaw = (Math.atan(800.00/100.00) + 90.00)/32.00;
         double idealYaw2 = (Math.atan(-3000.00/-600.00) + 180.00)/30.00;
@@ -376,9 +406,6 @@ public class GamePanel extends JPanel implements Runnable
         double[] ideals = new double[2];
         ideals[0] = idealYaw;
         ideals[1] = idealYaw2;
-
-        
-        Matrix matYaw = mat.rotationMatrixY(ideals[i]);
         
         //ACCELERATION
         timer++;
@@ -403,9 +430,9 @@ public class GamePanel extends JPanel implements Runnable
                 movementSpeed -= 3.12;
             }
         }
-        t.setRotAngleZ(fTheta);
+       // t.setRotAngleZ(fTheta);
         t.setRotAngleX(0);
-        t.setRotAngleY(ideals[i]);
+        //t.setRotAngleY(ideals[i]);
         
         t.setTransX(origin.x);
         t.setTransY(origin.y);
@@ -426,14 +453,7 @@ public class GamePanel extends JPanel implements Runnable
         
         Matrix matView = new Matrix(new double[][]{{0,0,0,0},{0,0,0,0},{0,0,0,0},{0,0,0,0}});
         matView = matView.inverseMatrix(matCamera);
-        
-      
-//        mesh.add(meshCube2);
-//        mesh.add(meshCube3);
-//        mesh.add(meshCube4);
-//        mesh.add(meshCube5);
-//        mesh.add(meshCube6);
-        
+
         List<Triangle> vecTrianglesToRaster = new ArrayList<>();
         
         for(Mesh m: mesh)
@@ -619,8 +639,8 @@ public class GamePanel extends JPanel implements Runnable
                     TexturedTriangle(g2, (int)tt.vec3d.x,(int)tt.vec3d.y, tt.vec2d.u, tt.vec2d.v,tt.vec2d.w,
                             (int)tt.vec3d2.x,(int)tt.vec3d2.y, tt.vec2d2.u, tt.vec2d2.v, tt.vec2d2.w,
                             (int)tt.vec3d3.x,(int)tt.vec3d3.y, tt.vec2d3.u, tt.vec2d3.v, tt.vec2d3.w,
-                    tt.img, visibility, false, pixels, zBuffer);
-                   
+                    tt.img, visibility, false, pixels, zBuffer, video);
+
                   // fillTriangle(pixels,(int)tt.vec3d.x,(int)tt.vec3d.y,(int)tt.vec3d2.x,(int)tt.vec3d2.y,
                   // (int)tt.vec3d3.x,(int)tt.vec3d3.y,tt.col);
 

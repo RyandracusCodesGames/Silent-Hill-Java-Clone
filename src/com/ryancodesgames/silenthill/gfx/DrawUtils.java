@@ -266,11 +266,11 @@ public class DrawUtils
     }
     
     public static void TexturedTriangle(Graphics2D g2, int x1, int y1, double u1, double v1, double w1, int x2, int y2, double
-    u2, double v2, double w2, int x3, int y3, double u3, double v3, double w3, BufferedImage img, double visibility, boolean fog, int[] pix, double[] zBuffer)
+    u2, double v2, double w2, int x3, int y3, double u3, double v3, double w3, BufferedImage img, double visibility, boolean fog, int[] pix, double[] zBuffer, int[] texArray)
     {
-       // short[] doubleBufferData;
-      //  DataBuffer dest = img.getRaster().getDataBuffer();
-       // doubleBufferData = ((DataBufferUShort)dest).getData();
+//        short[] doubleBufferData;
+//        DataBuffer dest = img.getRaster().getDataBuffer();
+//        doubleBufferData = ((DataBufferUShort)dest).getData();
      // PowerOf2Texture power = (PowerOf2Texture)createTexture(img);
         
         byte[] pixels = ((DataBufferByte)img.getRaster().getDataBuffer()).getData();
@@ -433,16 +433,16 @@ public class DrawUtils
 
                     if(Math.abs(tex_w) > zBuffer[i * 800 + j])
                     {
-                         Color background = Color.black;
-                         Color col = new Color(img.getRGB(
-                             (int)Math.max(0,tex_u/tex_w*(img.getWidth()-1)),
-                             (int)Math.max(0,tex_v/tex_w*(img.getHeight()-1))
-                           ));
+                        int iu = (int)(tex_u/tex_w) & getWidthShift(img);
+                        int iv = (int)(tex_v/tex_w) & getHeightShift(img);
+                        //THIS IS HOW I GRABBED RGB'S FROM COLOR CLASS BUT IS A BIT INCORRECT NOW
+                        //I DON'T KNOW HOW TO GRAB THE RIGHT RGB'S VALUES ANYMORE
+                        int col = texArray[(int)Math.max(0,tex_u/tex_w*(img.getWidth()-1)) + (int)Math.max(0,tex_v/tex_w*(img.getHeight()-1))];
+
 
                         if(fog)
                         {
-                            col = blend(background, col,(float)visibility);
-                            g2.setColor(col); 
+                            
                         }
 
                         else
@@ -525,16 +525,12 @@ public class DrawUtils
                      tex_w = (1.0 - t) * tex_sw + t * tex_ew;
                       if(Math.abs(tex_w) > zBuffer[i * 800 + j])
                     {
-                         Color background = Color.black;
-                         Color col = new Color(img.getRGB(
-                             (int)Math.max(0,tex_u/tex_w*(img.getWidth()-1)),
-                             (int)Math.max(0,tex_v/tex_w*(img.getHeight()-1))
-                           ));
+                        
+                         int col = texArray[(int)Math.max(0,tex_u/tex_w*(img.getWidth()-1)) + (int)Math.max(0,tex_v/tex_w*(img.getHeight()-1))];
 
                         if(fog)
                         {
-                            col = blend(background, col,(float)visibility);
-                            g2.setColor(col); 
+                            
                         }
 
                         else
@@ -603,6 +599,14 @@ public class DrawUtils
        if(x >= 0 && y >= 0 && x <= 800 && y <= 600)
        {
            pixels[x + y * 800] = col.getRGB();
+       }
+   }
+   
+   public static void draw(int[] pixels, int x, int y, int col)
+   {
+       if(x >= 0 && y >= 0 && x <= 800 && y <= 600)
+       {
+           pixels[x + y * 800] = col;
        }
    }
    
@@ -755,5 +759,29 @@ public class DrawUtils
 			if (y>y3) return;
 		}
    }
+   
+    public static int countbits(int n) 
+    {
+        int count = 0;
+        while (n > 0) {
+            count+=(n & 1);
+            n>>=1;
+        }
+        return count;
+    }
+    
+    public static int getWidthShift(BufferedImage img)
+    {
+        int shift = countbits(img.getWidth());
+        
+        return shift;
+    }
+    
+     public static int getHeightShift(BufferedImage img)
+    {
+        int shift = countbits(img.getHeight());
+        
+        return shift;
+    }
 
 }
