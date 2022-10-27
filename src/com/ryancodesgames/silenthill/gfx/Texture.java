@@ -77,6 +77,16 @@ public class Texture
         return texArray;
     }
     
+    public int getWidthMask()
+    {
+        return widthMask;
+    }
+    
+    public int getHeightMask()
+    {
+        return heightMask;
+    }
+    
     public int getPixel(int x, int y)
     {
         return texArray[x + y * getWidth()];
@@ -111,6 +121,13 @@ public class Texture
     public int getWidthShift()
     {
         int shift = countbits(getWidth());
+        
+        return shift;
+    }
+    
+    public static int getHeightShift(BufferedImage img)
+    {
+        int shift = countbits(img.getHeight());
         
         return shift;
     }

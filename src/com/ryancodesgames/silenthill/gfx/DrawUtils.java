@@ -437,8 +437,7 @@ public class DrawUtils
                         int iv = (int)(tex_v/tex_w) & getHeightShift(img);
                         //THIS IS HOW I GRABBED RGB'S FROM COLOR CLASS BUT IS A BIT INCORRECT NOW
                         //I DON'T KNOW HOW TO GRAB THE RIGHT RGB'S VALUES ANYMORE
-                        int col = texArray[(int)Math.max(0,tex_u/tex_w*(img.getWidth()-1)) + (int)Math.max(0,tex_v/tex_w*(img.getHeight()-1))];
-
+                        int col = texArray[iu + iv * img.getWidth()];
 
                         if(fog)
                         {
@@ -526,8 +525,11 @@ public class DrawUtils
                       if(Math.abs(tex_w) > zBuffer[i * 800 + j])
                     {
                         
-                         int col = texArray[(int)Math.max(0,tex_u/tex_w*(img.getWidth()-1)) + (int)Math.max(0,tex_v/tex_w*(img.getHeight()-1))];
-
+                        int iu = (int)(tex_u/tex_w) & getWidthShift(img);
+                        int iv = (int)(tex_v/tex_w) & getHeightShift(img);
+                        //THIS IS HOW I GRABBED RGB'S FROM COLOR CLASS BUT IS A BIT INCORRECT NOW
+                        //I DON'T KNOW HOW TO GRAB THE RIGHT RGB'S VALUES ANYMORE
+                        int col = texArray[iu + iv * img.getWidth()];
                         if(fog)
                         {
                             
